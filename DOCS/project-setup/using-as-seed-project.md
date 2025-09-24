@@ -124,47 +124,93 @@
 
 ## Step 7: Deploy to Netlify
 
-1. **Create a Netlify account**:
+### Prerequisites
+- Ensure your code is pushed to a GitHub repository
+- Have your environment variables ready (from Steps 2 & 3)
+
+### 1. **Create a Netlify account**:
 
    - Sign up at [Netlify](https://app.netlify.com/signup) if you don't already have an account
+   - Choose "Sign up with GitHub" for easier integration
 
-2. **Connect your GitHub repository**:
+### 2. **Connect your GitHub repository**:
 
-   - Go to the Netlify dashboard
-   - Click "Add new site" → "Import an existing project"
-   - Select GitHub as your Git provider
-   - Authorize Netlify to access your GitHub account
-   - Select your repository
+   - Go to the [Netlify dashboard](https://app.netlify.com)
+   - Click **"Add new site"** → **"Import an existing project"**
+   - Select **"GitHub"** as your Git provider
+   - **Authorize Netlify** to access your GitHub account (if not already done)
+   - **Search and select** your repository (e.g., `long-covid-ai`)
 
-3. **Configure build settings**:
+### 3. **Configure build settings**:
 
-   - Build command: `npm run build`
-   - Publish directory: `.next`
-   - Set Node.js version to 18 or higher in the environment variables
+   **Important**: Use these exact settings for Next.js:
+   - **Build command**: `yarn build` (or `npm run build`)
+   - **Publish directory**: `.next` 
+   - **Base directory**: Leave empty
+   - **Functions directory**: Leave empty
 
-4. **Add environment variables**:
+### 4. **Add environment variables** (CRITICAL):
 
-   - In the Netlify dashboard, go to Site settings → Environment variables
-   - Add all required environment variables:
-     - `DB_URL`: Your Neon database connection string
-     - `RESEND_API_KEY`: Your Resend API key
-     - `HIGHLIGHT_API_KEY`: Your Highlight API key
-     - `NODE_VERSION`: Set to `18` or higher
+   Before deploying, add these environment variables:
+   
+   - In Netlify dashboard: **Site settings** → **Environment variables** → **Add variable**
+   - Add each variable individually:
 
-5. **Deploy your site**:
+   ```
+   NODE_VERSION=20
+   APP_ENV=PRODUCTION
+   DB_URL=postgresql://[your-neon-connection-string]
+   RESEND_API_KEY=re_[your-resend-api-key]
+   HIGHLIGHT_API_KEY=[your-highlight-api-key]
+   MIGRATIONS_PATH=./drizzle/migrations
+   ```
 
-   - Click "Deploy site"
-   - Wait for the build and deployment to complete
+   **⚠️ Important**: Copy these values from your local `.env.local` file
 
-6. **Set up a custom domain (optional)**:
+### 5. **Deploy your site**:
 
-   - In the Netlify dashboard, go to Site settings → Domain management
-   - Click "Add custom domain"
-   - Follow the instructions to configure your domain
+   - Click **"Deploy site"**
+   - **Monitor the build logs** for any errors
+   - First deployment typically takes 2-3 minutes
+   - **Check the deploy log** if build fails
 
-7. **Enable continuous deployment**:
-   - Netlify automatically sets up continuous deployment from your GitHub repository
-   - Every push to your main branch will trigger a new deployment
+### 6. **Verify deployment**:
+
+   - Once deployed, click the **site URL** to test
+   - Test key functionality:
+     - Homepage loads
+     - Registration/login works
+     - Database connectivity (try registering a test user)
+
+### 7. **Set up custom domain** (optional):
+
+   - Go to **Site settings** → **Domain management**
+   - Click **"Add custom domain"**
+   - Follow DNS configuration instructions
+
+### 8. **Continuous deployment** (automatic):
+   - ✅ **Automatic**: Every push to your `main` branch triggers a new deployment
+   - View deployment history in the Netlify dashboard
+   - Rollback to previous versions if needed
+
+### 🔧 **Build Configuration File** (Alternative)
+
+You can also create a `netlify.toml` file in your project root for consistent builds:
+
+```toml
+[build]
+  command = "yarn build"
+  publish = ".next"
+
+[build.environment]
+  NODE_VERSION = "20"
+
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Frame-Options = "DENY"
+    X-XSS-Protection = "1; mode=block"
+```
 
 ## Common Issues and Troubleshooting
 
