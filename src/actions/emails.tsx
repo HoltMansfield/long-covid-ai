@@ -6,9 +6,9 @@ export const sendWelcomeEmail = async (email: string) => {
   const resend = new Resend(env.RESEND_API_KEY);
 
   await resend.emails.send({
-    from: "no-reply@classAcampW.com",
+    from: "no-reply@long-covid-ai.com",
     to: email,
-    subject: "Welocome to Class Action Camping World",
+    subject: "Welcome to Long COVID AI",
     react: <StripeWelcomeEmail />,
   });
 };
