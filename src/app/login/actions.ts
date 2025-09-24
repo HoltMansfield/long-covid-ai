@@ -77,12 +77,11 @@ async function _loginAction(
   const cookieStore = await cookies();
   cookieStore.set("session_user", user.email ?? "", { path: "/" });
 
-  // Temporarily disable Highlight to debug login issue
-  // if (env.APP_ENV !== "E2E" && env.APP_ENV !== "CI") {
-  //   if (user.email) {
-  //     H.identify(user.email);
-  //   }
-  // }
+  if (env.APP_ENV !== "E2E" && env.APP_ENV !== "CI") {
+    if (user.email) {
+      H.identify(user.email);
+    }
+  }
   
   // Use server-side redirect instead of returning success
   redirect("/");

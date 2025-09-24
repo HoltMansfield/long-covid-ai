@@ -2,8 +2,8 @@ import { H } from "@highlight-run/node";
 import { env } from "@/env";
 
 H.init({
-  projectID: "ney02ovd",
-  serviceName: "nextjs-server",
+  projectID: "d0oevl36hees769uqvl0",
+  serviceName: "long-covid-ai-server",
   environment: env.APP_ENV,
 });
 
