@@ -77,11 +77,8 @@ async function _loginAction(
   const cookieStore = await cookies();
   cookieStore.set("session_user", user.email ?? "", { path: "/" });
 
-  if (env.APP_ENV !== "E2E" && env.APP_ENV !== "CI") {
-    if (user.email) {
-      H.identify(user.email);
-    }
-  }
+  // Note: H.identify() should be called on the client-side after successful login
+  // Server-side H.identify() is not supported
   
   // Use server-side redirect instead of returning success
   redirect("/");
