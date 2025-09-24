@@ -1,0 +1,39 @@
+name: Upload Highlight Sourcemaps
+
+on:
+  push:
+    branches:
+      - main
+      - highlight-io
+      - highlight-sourcemaps
+  workflow_dispatch:
+
+jobs:
+  upload-sourcemaps:
+    runs-on: ubuntu-latest
+    environment: CI # this is where environment variables are set
+    env:
+      APP_ENV: CI
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build Next.js app
+        run: npm run build
+
+      - name: Log api key
+        run: echo "${{ secrets.HIGHLIGHT_API_KEY }}"
+
+      - name: Upload Highlight sourcemaps
+        run: |
+          npx @highlight-run/sourcemap-uploader upload \
+            --apiKey "${{ secrets.HIGHLIGHT_API_KEY }}" \
+            --path .next

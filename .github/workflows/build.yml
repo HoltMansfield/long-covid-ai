@@ -1,0 +1,24 @@
+name: Next.js Build
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+
+jobs:
+  build:
+    name: Build Next.js App
+    #environment: CI # this is where environment variables are set
+    runs-on: ubuntu-latest
+    env:
+      APP_ENV: CI
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: lts/*
+      - name: Install dependencies
+        run: npm ci
+      - name: Build Next.js app
+        run: npm run build
