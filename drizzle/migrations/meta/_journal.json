@@ -29,6 +29,13 @@
       "when": 1758685849509,
       "tag": "0003_magenta_kylun",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1758842560412,
+      "tag": "0004_lowly_living_tribunal",
+      "breakpoints": true
     }
   ]
 }

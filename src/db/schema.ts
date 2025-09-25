@@ -52,13 +52,29 @@ export const crashReports = pgTable("crash_reports", {
     .notNull()
     .references(() => users.id, { onDelete: "cascade" }),
   severity: integer("severity").notNull(), // 1-10 scale
-  symptoms: jsonb("symptoms"), // array of symptoms
-  triggers: jsonb("triggers"), // potential triggers
-  activities: jsonb("activities"), // activities before crash
+  
+  // Structured crash data for AI analysis
+  triggers: jsonb("triggers"), // array of trigger objects: {type, description, intensity}
+  symptoms: jsonb("symptoms"), // array of symptom objects: {name, severity, duration}
+  timeline: jsonb("timeline"), // {onset, duration, recovery_time, phases}
+  activities: jsonb("activities"), // activities before crash with timing
+  
+  // Recovery and patterns
+  recoveryStrategies: jsonb("recovery_strategies"), // what helped recovery
+  environmentalFactors: jsonb("environmental_factors"), // weather, location, etc.
+  
+  // Raw AI conversation data
+  conversationId: uuid("conversation_id").references(() => conversations.id),
+  aiSummary: text("ai_summary"), // The structured summary from AI
+  rawConversation: jsonb("raw_conversation"), // Full conversation for re-analysis
+  
+  // Legacy fields (keeping for backward compatibility)
   durationHours: integer("duration_hours"),
   recoveryTimeHours: integer("recovery_time_hours"),
   notes: text("notes"),
+  
   createdAt: timestamp("created_at", { mode: "date" }).defaultNow(),
+  updatedAt: timestamp("updated_at", { mode: "date" }).defaultNow(),
 });
 
 export const conversations = pgTable("conversations", {
