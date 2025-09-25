@@ -1,15 +1,23 @@
+"use server";
+
 import { generateAIResponse, ChatMessage } from "@/lib/openai";
 import { withHighlightError } from "@/highlight-error";
 
-async function _chatHandler(request: Request) {
-  try {
-    const { messages } = await request.json();
+interface ChatActionResult {
+  success: boolean;
+  message?: string;
+  timestamp?: string;
+  error?: string;
+}
 
+async function _sendChatMessage(messages: ChatMessage[]): Promise<ChatActionResult> {
+  try {
+    // Validate messages array
     if (!messages || !Array.isArray(messages)) {
-      return Response.json(
-        { error: "Invalid messages format" },
-        { status: 400 }
-      );
+      return {
+        success: false,
+        error: "Invalid messages format"
+      };
     }
 
     // Validate message format
@@ -26,23 +34,27 @@ async function _chatHandler(request: Request) {
     );
 
     if (validMessages.length === 0) {
-      return Response.json(
-        { error: "No valid messages provided" },
-        { status: 400 }
-      );
+      return {
+        success: false,
+        error: "No valid messages provided"
+      };
     }
 
     // Generate AI response
     const aiResponse = await generateAIResponse(validMessages);
 
-    return Response.json({
+    return {
+      success: true,
       message: aiResponse,
       timestamp: new Date().toISOString(),
-    });
+    };
   } catch (error) {
-    console.error("Chat API error:", error);
-    return Response.json({ error: "Internal server error" }, { status: 500 });
+    console.error("Chat action error:", error);
+    return {
+      success: false,
+      error: "Internal server error"
+    };
   }
 }
 
-export const POST = withHighlightError(_chatHandler);
+export const sendChatMessage = withHighlightError(_sendChatMessage);

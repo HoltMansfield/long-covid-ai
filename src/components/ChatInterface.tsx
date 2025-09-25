@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect } from "react";
 import { ChatMessage } from "@/lib/openai";
+import { sendChatMessage } from "@/app/chat/actions";
 
 interface ChatInterfaceProps {
   initialMessages?: ChatMessage[];
@@ -41,30 +42,15 @@ export default function ChatInterface({
     setIsLoading(true);
 
     try {
-      const response = await fetch("/api/chat", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ messages: newMessages }),
-      });
+      const result = await sendChatMessage(newMessages);
 
-      if (!response.ok) {
-        throw new Error("Failed to get AI response");
+      if (!result.success) {
+        throw new Error(result.error || "Failed to get AI response");
       }
-      const responseText = await response.text();
 
-      let data;
-      try {
-        data = JSON.parse(responseText);
-      } catch (parseError) {
-        console.error("JSON parse error:", parseError);
-        console.error("Response text that failed to parse:", responseText);
-        throw new Error("Invalid JSON response from server");
-      }
       const aiMessage: ChatMessage = {
         role: "assistant",
-        content: data.message,
+        content: result.message || "No response received",
       };
 
       const finalMessages = [...newMessages, aiMessage];
