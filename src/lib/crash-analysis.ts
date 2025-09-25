@@ -68,8 +68,16 @@ Focus on:
 4. Risk factors that predict worse crashes
 5. Trends over time (if multiple reports)
 6. Actionable recommendations for prevention
+7. Recognition that brief/minimal communication often indicates severe crashes
+8. Understanding that the most severely affected patients may provide the least detailed reports
 
-Be specific and evidence-based in your analysis.
+Special considerations for severely ill patients:
+- Short responses may indicate cognitive impairment and high crash severity
+- Inability to elaborate often correlates with worse symptoms
+- Communication struggles are themselves important data points
+- Every piece of information matters, especially from those most affected
+
+Be specific and evidence-based in your analysis, while being inclusive of all severity levels.
 `;
 
   try {
@@ -152,7 +160,14 @@ Extract the following information and return as JSON:
   "aiSummary": "string - a formatted summary of the crash report"
 }
 
-Only include information that was explicitly mentioned in the conversation. Use null for missing values.
+IMPORTANT: Pay special attention to implied severity indicators:
+- Very brief responses often indicate severe cognitive impairment (severity 7-10)
+- Phrases like "can't think," "too tired," "bad crash" suggest high severity
+- Inability to provide details may correlate with crash severity
+- Communication struggles themselves are symptoms worth noting
+- If someone can only manage short responses, infer higher severity
+
+Only include information that was explicitly mentioned or can be reasonably inferred from the conversation context. Use null for missing values.
 `;
 
   try {
