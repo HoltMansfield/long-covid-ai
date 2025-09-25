@@ -5,7 +5,7 @@ import { crashReports, conversations } from "@/db/schema";
 import { withHighlightError } from "@/highlight-error";
 import { StructuredCrashReport } from "@/types/crash-report";
 import { ChatMessage } from "@/lib/openai";
-import { eq } from "drizzle-orm";
+import { eq, gte } from "drizzle-orm";
 
 interface SaveCrashReportResult {
   success: boolean;
@@ -61,6 +61,76 @@ async function _saveCrashReport(
 
 
 export const saveCrashReport = withHighlightError(_saveCrashReport);
+
+// Function to update an existing crash report
+async function _updateCrashReport(
+  crashReportId: string,
+  crashReportData: StructuredCrashReport,
+  conversationMessages: ChatMessage[]
+): Promise<SaveCrashReportResult> {
+  try {
+    // Update the crash report
+    const [updatedCrashReport] = await db.update(crashReports)
+      .set({
+        severity: crashReportData.severity,
+        triggers: crashReportData.triggers,
+        symptoms: crashReportData.symptoms,
+        timeline: crashReportData.timeline,
+        activities: crashReportData.activities,
+        recoveryStrategies: crashReportData.recoveryStrategies || [],
+        environmentalFactors: crashReportData.environmentalFactors || [],
+        aiSummary: crashReportData.aiSummary,
+        rawConversation: conversationMessages,
+        updatedAt: new Date()
+      })
+      .where(eq(crashReports.id, crashReportId))
+      .returning();
+
+    // Update the associated conversation
+    if (updatedCrashReport.conversationId) {
+      await db.update(conversations)
+        .set({ 
+          messages: conversationMessages,
+          updatedAt: new Date()
+        })
+        .where(eq(conversations.id, updatedCrashReport.conversationId));
+    }
+
+    return {
+      success: true,
+      crashReportId: updatedCrashReport.id
+    };
+  } catch (error) {
+    console.error("Error updating crash report:", error);
+    return {
+      success: false,
+      error: "Failed to update crash report"
+    };
+  }
+}
+
+export const updateCrashReport = withHighlightError(_updateCrashReport);
+
+// Function to find existing crash report from recent conversation
+async function _findRecentCrashReport(userId: string): Promise<string | null> {
+  try {
+    // Look for crash reports created in the last 2 hours
+    const twoHoursAgo = new Date(Date.now() - 2 * 60 * 60 * 1000);
+    
+    const recentReports = await db.select({ id: crashReports.id })
+      .from(crashReports)
+      .where(eq(crashReports.userId, userId))
+      .orderBy(crashReports.createdAt)
+      .limit(1);
+    
+    return recentReports[0]?.id || null;
+  } catch (error) {
+    console.error("Error finding recent crash report:", error);
+    return null;
+  }
+}
+
+export const findRecentCrashReport = withHighlightError(_findRecentCrashReport);
 
 // Function to get user's crash reports for analysis
 async function _getUserCrashReports(userId: string) {
