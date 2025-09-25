@@ -5,6 +5,7 @@ import { withHighlightError } from "@/highlight-error";
 import { extractCrashReportFromConversation } from "@/lib/crash-analysis";
 import { saveCrashReport, updateCrashReport, findRecentCrashReport } from "./crash-report-actions";
 import { getCurrentUserId } from "@/actions/auth";
+import { H } from '@highlight-run/next/client';
 
 interface ChatActionResult {
   success: boolean;
@@ -80,8 +81,16 @@ async function _sendChatMessage(messages: ChatMessage[]): Promise<ChatActionResu
         }
       }
     } catch (error) {
-      // Don't fail the chat if crash report saving fails
+      // Log crash report saving errors to Highlight for monitoring
       console.error("Error in crash report detection/saving:", error);
+      H.consumeError(error as Error);
+      // Add additional context for debugging
+      H.track('crash_report_saving_error', {
+        context: 'crash_report_saving',
+        userId: await getCurrentUserId(),
+        messageCount: updatedMessages.length,
+        errorMessage: (error as Error).message
+      });
     }
 
     return {
