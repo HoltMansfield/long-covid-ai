@@ -4,6 +4,7 @@ import { db } from "@/db/connect";
 import { crashReports, conversations } from "@/db/schema";
 import { withHighlightError } from "@/highlight-error";
 import { StructuredCrashReport } from "@/types/crash-report";
+import { ChatMessage } from "@/lib/openai";
 import { eq } from "drizzle-orm";
 
 interface SaveCrashReportResult {
@@ -15,7 +16,7 @@ interface SaveCrashReportResult {
 async function _saveCrashReport(
   userId: string,
   crashReportData: StructuredCrashReport,
-  conversationMessages: any[]
+  conversationMessages: ChatMessage[]
 ): Promise<SaveCrashReportResult> {
   try {
     // First, save the conversation
