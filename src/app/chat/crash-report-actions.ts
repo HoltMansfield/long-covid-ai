@@ -38,11 +38,7 @@ async function _saveCrashReport(
       environmentalFactors: crashReportData.environmentalFactors || [],
       conversationId: conversation.id,
       aiSummary: crashReportData.aiSummary,
-      rawConversation: conversationMessages,
-      // Legacy fields for backward compatibility
-      durationHours: parseDurationToHours(crashReportData.timeline.duration),
-      recoveryTimeHours: parseDurationToHours(crashReportData.timeline.recoveryTime),
-      notes: crashReportData.aiSummary
+      rawConversation: conversationMessages
     }).returning();
 
     // Update conversation with crash report reference
@@ -63,23 +59,6 @@ async function _saveCrashReport(
   }
 }
 
-// Helper function to parse duration strings to hours
-function parseDurationToHours(duration: string): number | null {
-  if (!duration) return null;
-  
-  // Simple parsing - can be enhanced
-  const dayMatch = duration.match(/(\d+(?:\.\d+)?)\s*days?/i);
-  if (dayMatch) {
-    return Math.round(parseFloat(dayMatch[1]) * 24);
-  }
-  
-  const hourMatch = duration.match(/(\d+(?:\.\d+)?)\s*hours?/i);
-  if (hourMatch) {
-    return Math.round(parseFloat(hourMatch[1]));
-  }
-  
-  return null;
-}
 
 export const saveCrashReport = withHighlightError(_saveCrashReport);
 

@@ -68,11 +68,6 @@ export const crashReports = pgTable("crash_reports", {
   aiSummary: text("ai_summary"), // The structured summary from AI
   rawConversation: jsonb("raw_conversation"), // Full conversation for re-analysis
   
-  // Legacy fields (keeping for backward compatibility)
-  durationHours: integer("duration_hours"),
-  recoveryTimeHours: integer("recovery_time_hours"),
-  notes: text("notes"),
-  
   createdAt: timestamp("created_at", { mode: "date" }).defaultNow(),
   updatedAt: timestamp("updated_at", { mode: "date" }).defaultNow(),
 });
