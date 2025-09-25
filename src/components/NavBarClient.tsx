@@ -18,9 +18,9 @@ export default function NavBarClient({ currentUser }: NavBarClientProps) {
     <nav className="sticky top-0 z-50 flex items-center justify-between flex-wrap bg-slate-500 py-0 pt-[1px] lg:py-1 lg:px-12 shadow border-solid border-t-1 border-blue-900">
       <div className="flex justify-between lg:w-auto w-full lg:border-b-0 pl-6 pr-2 pb-1 lg:pb-0">
         <div className="flex items-center flex-shrink-0 text-gray-800 mr-16">
-          <span className="font-semibold text-base tracking-tight text-slate-200">
-            Class Action Camping World
-          </span>
+          <Link href="/" className="font-semibold text-base tracking-tight text-slate-200 hover:text-white">
+            Long COVID AI
+          </Link>
         </div>
         <div className="block lg:hidden">
           <button
@@ -43,24 +43,28 @@ export default function NavBarClient({ currentUser }: NavBarClientProps) {
         } lg:block transition-all duration-200`}
       >
         <div className="text-md font-bold lg:flex-grow">
-          <button
-            type="button"
-            className="block lg:inline-block mt-4 lg:mt-0 text-slate-800 px-4 py-2 rounded hover:text-white hover:bg-slate-950 mr-2"
-          >
-            Menu 1
-          </button>
-          <button
-            type="button"
-            className="block lg:inline-block mt-4 lg:mt-0 text-slate-800 px-4 py-2 rounded hover:text-white hover:bg-slate-950 mr-2"
-          >
-            Menu 2
-          </button>
-          <button
-            type="button"
-            className="block lg:inline-block mt-4 lg:mt-0 text-slate-800 px-4 py-2 rounded hover:text-white hover:bg-slate-950 mr-2"
-          >
-            Menu 3
-          </button>
+          {currentUser && (
+            <>
+              <Link
+                href="/chat"
+                className="block lg:inline-block mt-4 lg:mt-0 text-slate-200 px-4 py-2 rounded hover:text-white hover:bg-slate-950 mr-2"
+              >
+                💬 AI Assistant
+              </Link>
+              <Link
+                href="/dashboard"
+                className="block lg:inline-block mt-4 lg:mt-0 text-slate-200 px-4 py-2 rounded hover:text-white hover:bg-slate-950 mr-2"
+              >
+                📊 Dashboard
+              </Link>
+              <Link
+                href="/secure-page"
+                className="block lg:inline-block mt-4 lg:mt-0 text-slate-200 px-4 py-2 rounded hover:text-white hover:bg-slate-950 mr-2"
+              >
+                🔒 Profile
+              </Link>
+            </>
+          )}
         </div>
 
         <div className="flex">
