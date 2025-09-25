@@ -10,7 +10,7 @@ H.init({
 export function withHighlightError<Args extends unknown[], R>(
   fn: (...params: Args) => Promise<R>
 ):
-  (..._params: Args) => Promise<R> {
+  (...params: Args) => Promise<R> {
   return async (...params: Args): Promise<R> => {
     if (env.APP_ENV === "E2E") {
       return await fn(...params);

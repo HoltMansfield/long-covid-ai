@@ -46,6 +46,16 @@ const envSchema = yup.object({
     otherwise: () => yup.string().optional(),
   }),
 
+  // AI Integration
+  OPENAI_API_KEY: yup.string().when("APP_ENV", {
+    is: (env: string) => env === "E2E" || env === "CI",
+    then: () => yup.string().default("noAIForThis_APP_ENV"),
+    otherwise: () =>
+      yup
+        .string()
+        .required("OpenAI API key is required for AI functionality"),
+  }),
+
   // Testing
   E2E_URL: yup.string().when("APP_ENV", {
     is: "E2E",

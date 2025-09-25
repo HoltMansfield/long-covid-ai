@@ -1,6 +1,5 @@
 "use server";
 import { withHighlightError } from "@/highlight-error";
-import { H } from '@highlight-run/next/client';
 import { cookies } from "next/headers";
 import { db } from "@/db/connect";
 import { users } from "@/db/schema";
@@ -8,7 +7,6 @@ import { eq } from "drizzle-orm";
 import bcrypt from "bcryptjs";
 import { MAX_FAILED_ATTEMPTS, LOCKOUT_DURATION_MS } from "./constants";
 import { redirect } from "next/navigation";
-import { env } from "@/env";
 
 async function _loginAction(
   state: { error?: string; success?: boolean } | undefined,

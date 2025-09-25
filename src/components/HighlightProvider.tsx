@@ -1,10 +1,17 @@
 "use client";
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { H } from "@highlight-run/next/client";
 
 export default function HighlightProvider({ children }: { children: React.ReactNode }) {
+  const lastIdentifiedUser = useRef<string | null>(null);
+  const isInitialized = useRef(false);
+
   useEffect(() => {
-    H.init("d0oevl36hees769uqvl0");
+    // Only initialize once
+    if (!isInitialized.current) {
+      H.init("d0oevl36hees769uqvl0");
+      isInitialized.current = true;
+    }
     
     // Check if user is logged in and identify them
     const checkUserSession = () => {
@@ -14,26 +21,33 @@ export default function HighlightProvider({ children }: { children: React.ReactN
       
       if (sessionCookie) {
         const userEmail = sessionCookie.split('=')[1];
-        if (userEmail && userEmail !== '') {
+        if (userEmail && userEmail !== '' && userEmail !== lastIdentifiedUser.current) {
+          // Only identify if this is a different user than last time
           H.identify(userEmail);
+          lastIdentifiedUser.current = userEmail;
         }
+      } else if (lastIdentifiedUser.current !== null) {
+        // User logged out - clear the last identified user
+        lastIdentifiedUser.current = null;
       }
     };
     
-    // Identify user on initial load
+    // Identify user on initial load and when component mounts
     checkUserSession();
     
-    // Listen for navigation changes to re-identify user
-    const handleNavigation = () => {
-      setTimeout(checkUserSession, 100); // Small delay to ensure cookies are updated
+    // Optional: Listen for storage events if you want to detect login/logout in other tabs
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === 'user_session_changed') {
+        checkUserSession();
+      }
     };
     
-    window.addEventListener('popstate', handleNavigation);
+    window.addEventListener('storage', handleStorageChange);
     
     return () => {
-      window.removeEventListener('popstate', handleNavigation);
+      window.removeEventListener('storage', handleStorageChange);
     };
-  }, []);
+  }, []); // Empty dependency array - only run once
   
   return <>{children}</>;
 }
