@@ -2,33 +2,7 @@ import { test, expect } from '@playwright/test';
 
 test.describe('OpenAI Chat Integration', () => {
   test('chat interface loads and can send/receive messages', async ({ page }) => {
-    // Navigate to chat page
-    await page.goto(`${process.env.E2E_URL}/chat`);
-    
-    // Check if we're redirected to login page
-    if (page.url().includes('/login')) {
-      console.log('Redirected to login page, need to authenticate');
-      
-      // Generate a unique test user
-      const uniqueEmail = `chat-test-${Date.now()}@example.com`;
-      const password = 'Password123';
-      
-      // Register a new user
-      await page.goto(`${process.env.E2E_URL}/register`);
-      await page.fill('input[name="email"]', uniqueEmail);
-      await page.fill('input[name="password"]', password);
-      await page.click('button[type="submit"]');
-      await page.waitForTimeout(2000);
-      
-      // Login with the new user
-      await page.goto(`${process.env.E2E_URL}/login`);
-      await page.fill('input[name="email"]', uniqueEmail);
-      await page.fill('input[name="password"]', password);
-      await page.click('button[type="submit"]');
-      await page.waitForTimeout(2000);
-    }
-    
-    // Navigate to chat page
+    // Navigate to chat page (user is already authenticated)
     await page.goto(`${process.env.E2E_URL}/chat`);
     await page.waitForTimeout(2000);
     
@@ -43,29 +17,9 @@ test.describe('OpenAI Chat Integration', () => {
   });
 
   test('can send a message and receive AI response', async ({ page }) => {
-    // Navigate to chat page
+    // Navigate to chat page (user is already authenticated)
     await page.goto(`${process.env.E2E_URL}/chat`);
-    
-    // Handle authentication if needed
-    if (page.url().includes('/login')) {
-      const uniqueEmail = `chat-ai-test-${Date.now()}@example.com`;
-      const password = 'Password123';
-      
-      await page.goto(`${process.env.E2E_URL}/register`);
-      await page.fill('input[name="email"]', uniqueEmail);
-      await page.fill('input[name="password"]', password);
-      await page.click('button[type="submit"]');
-      await page.waitForTimeout(2000);
-      
-      await page.goto(`${process.env.E2E_URL}/login`);
-      await page.fill('input[name="email"]', uniqueEmail);
-      await page.fill('input[name="password"]', password);
-      await page.click('button[type="submit"]');
-      await page.waitForTimeout(2000);
-      
-      await page.goto(`${process.env.E2E_URL}/chat`);
-      await page.waitForTimeout(2000);
-    }
+    await page.waitForTimeout(2000);
     
     // Send a simple test message
     const testMessage = 'Hello, this is a test message';
