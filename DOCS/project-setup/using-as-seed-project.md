@@ -95,8 +95,20 @@
      - `DB_URL`: Your database connection string
      - `HIGHLIGHT_API_KEY`: Your Highlight API key
      - `RESEND_API_KEY`: Your Resend API key
+     - `DOCKERHUB_USERNAME`: Your Docker Hub username (required for e2e tests)
+     - `DOCKERHUB_TOKEN`: Your Docker Hub access token (required for e2e tests)
 
-2. Review and update the GitHub Actions workflows in `.github/workflows/` if needed
+2. **Docker Hub Setup for E2E Tests**:
+   
+   The e2e tests require Docker Hub authentication to pull the PostgreSQL image:
+   
+   - Go to [Docker Hub](https://hub.docker.com) and create an account if needed
+   - Go to Account Settings → Security → Access Tokens
+   - Create a new access token with "Public Repo Read" permissions
+   - Add `DOCKERHUB_USERNAME` (your Docker Hub username) to GitHub secrets
+   - Add `DOCKERHUB_TOKEN` (the access token, not your password) to GitHub secrets
+
+3. Review and update the GitHub Actions workflows in `.github/workflows/` if needed
 
 ## Step 6: Customize the Application
 
