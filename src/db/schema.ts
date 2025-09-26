@@ -46,32 +46,56 @@ export const verificationTokensPrimaryKey = primaryKey({
 });
 
 // Long COVID AI specific tables
+// First define conversations without the circular reference
+export const conversations = pgTable("conversations", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  userId: uuid("user_id")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
+  messages: jsonb("messages"), // conversation history
+  recommendations: jsonb("recommendations"), // array of recommendations
+  status: varchar("status", { length: 50 }).default("active"), // active, completed, etc.
+  createdAt: timestamp("created_at", { mode: "date" }).defaultNow(),
+  updatedAt: timestamp("updated_at", { mode: "date" }).defaultNow(),
+});
+
+// Then define crashReports with reference to conversations
 export const crashReports = pgTable("crash_reports", {
   id: uuid("id").primaryKey().defaultRandom(),
   userId: uuid("user_id")
     .notNull()
     .references(() => users.id, { onDelete: "cascade" }),
   severity: integer("severity").notNull(), // 1-10 scale
-  symptoms: jsonb("symptoms"), // array of symptoms
-  triggers: jsonb("triggers"), // potential triggers
-  activities: jsonb("activities"), // activities before crash
-  durationHours: integer("duration_hours"),
-  recoveryTimeHours: integer("recovery_time_hours"),
-  notes: text("notes"),
-  createdAt: timestamp("created_at", { mode: "date" }).defaultNow(),
-});
-
-export const conversations = pgTable("conversations", {
-  id: uuid("id").primaryKey().defaultRandom(),
-  userId: uuid("user_id")
-    .notNull()
-    .references(() => users.id, { onDelete: "cascade" }),
-  crashReportId: uuid("crash_report_id").references(() => crashReports.id, { onDelete: "cascade" }),
-  messages: jsonb("messages"), // conversation history
-  recommendations: jsonb("recommendations"), // array of recommendations
-  status: varchar("status", { length: 50 }).default("active"), // active, completed, etc.
+  
+  // Structured crash data for AI analysis
+  triggers: jsonb("triggers"), // array of trigger objects: {type, description, intensity}
+  symptoms: jsonb("symptoms"), // array of symptom objects: {name, severity, duration}
+  timeline: jsonb("timeline"), // {onset, duration, recovery_time, phases}
+  activities: jsonb("activities"), // activities before crash with timing
+  
+  // Recovery and patterns
+  recoveryStrategies: jsonb("recovery_strategies"), // what helped recovery
+  environmentalFactors: jsonb("environmental_factors"), // weather, location, etc.
+  
+  // Raw AI conversation data
+  conversationId: uuid("conversation_id").references(() => conversations.id),
+  aiSummary: text("ai_summary"), // The structured summary from AI
+  rawConversation: jsonb("raw_conversation"), // Full conversation for re-analysis
+  
   createdAt: timestamp("created_at", { mode: "date" }).defaultNow(),
   updatedAt: timestamp("updated_at", { mode: "date" }).defaultNow(),
+});
+
+// Add a separate table to link conversations to crash reports if needed
+// This avoids the circular reference while maintaining the relationship
+export const conversationCrashReports = pgTable("conversation_crash_reports", {
+  conversationId: uuid("conversation_id")
+    .notNull()
+    .references(() => conversations.id, { onDelete: "cascade" }),
+  crashReportId: uuid("crash_report_id")
+    .notNull()
+    .references(() => crashReports.id, { onDelete: "cascade" }),
+  createdAt: timestamp("created_at", { mode: "date" }).defaultNow(),
 });
 
 export const researchPapers = pgTable("research_papers", {
@@ -104,6 +128,7 @@ export type NewSession = InferInsertModel<typeof sessions>;
 export type NewVerificationToken = InferInsertModel<typeof verificationTokens>;
 export type NewCrashReport = InferInsertModel<typeof crashReports>;
 export type NewConversation = InferInsertModel<typeof conversations>;
+export type NewConversationCrashReport = InferInsertModel<typeof conversationCrashReports>;
 export type NewResearchPaper = InferInsertModel<typeof researchPapers>;
 export type NewUserAnalytics = InferInsertModel<typeof userAnalytics>;
 
@@ -113,5 +138,6 @@ export type Session = InferSelectModel<typeof sessions>;
 export type VerificationToken = InferSelectModel<typeof verificationTokens>;
 export type CrashReport = InferSelectModel<typeof crashReports>;
 export type Conversation = InferSelectModel<typeof conversations>;
+export type ConversationCrashReport = InferSelectModel<typeof conversationCrashReports>;
 export type ResearchPaper = InferSelectModel<typeof researchPapers>;
 export type UserAnalytics = InferSelectModel<typeof userAnalytics>;
