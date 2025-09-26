@@ -46,6 +46,20 @@ export const verificationTokensPrimaryKey = primaryKey({
 });
 
 // Long COVID AI specific tables
+// First define conversations without the circular reference
+export const conversations = pgTable("conversations", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  userId: uuid("user_id")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
+  messages: jsonb("messages"), // conversation history
+  recommendations: jsonb("recommendations"), // array of recommendations
+  status: varchar("status", { length: 50 }).default("active"), // active, completed, etc.
+  createdAt: timestamp("created_at", { mode: "date" }).defaultNow(),
+  updatedAt: timestamp("updated_at", { mode: "date" }).defaultNow(),
+});
+
+// Then define crashReports with reference to conversations
 export const crashReports = pgTable("crash_reports", {
   id: uuid("id").primaryKey().defaultRandom(),
   userId: uuid("user_id")
@@ -72,17 +86,16 @@ export const crashReports = pgTable("crash_reports", {
   updatedAt: timestamp("updated_at", { mode: "date" }).defaultNow(),
 });
 
-export const conversations = pgTable("conversations", {
-  id: uuid("id").primaryKey().defaultRandom(),
-  userId: uuid("user_id")
+// Add a separate table to link conversations to crash reports if needed
+// This avoids the circular reference while maintaining the relationship
+export const conversationCrashReports = pgTable("conversation_crash_reports", {
+  conversationId: uuid("conversation_id")
     .notNull()
-    .references(() => users.id, { onDelete: "cascade" }),
-  crashReportId: uuid("crash_report_id").references(() => crashReports.id, { onDelete: "cascade" }),
-  messages: jsonb("messages"), // conversation history
-  recommendations: jsonb("recommendations"), // array of recommendations
-  status: varchar("status", { length: 50 }).default("active"), // active, completed, etc.
+    .references(() => conversations.id, { onDelete: "cascade" }),
+  crashReportId: uuid("crash_report_id")
+    .notNull()
+    .references(() => crashReports.id, { onDelete: "cascade" }),
   createdAt: timestamp("created_at", { mode: "date" }).defaultNow(),
-  updatedAt: timestamp("updated_at", { mode: "date" }).defaultNow(),
 });
 
 export const researchPapers = pgTable("research_papers", {
@@ -115,6 +128,7 @@ export type NewSession = InferInsertModel<typeof sessions>;
 export type NewVerificationToken = InferInsertModel<typeof verificationTokens>;
 export type NewCrashReport = InferInsertModel<typeof crashReports>;
 export type NewConversation = InferInsertModel<typeof conversations>;
+export type NewConversationCrashReport = InferInsertModel<typeof conversationCrashReports>;
 export type NewResearchPaper = InferInsertModel<typeof researchPapers>;
 export type NewUserAnalytics = InferInsertModel<typeof userAnalytics>;
 
@@ -124,5 +138,6 @@ export type Session = InferSelectModel<typeof sessions>;
 export type VerificationToken = InferSelectModel<typeof verificationTokens>;
 export type CrashReport = InferSelectModel<typeof crashReports>;
 export type Conversation = InferSelectModel<typeof conversations>;
+export type ConversationCrashReport = InferSelectModel<typeof conversationCrashReports>;
 export type ResearchPaper = InferSelectModel<typeof researchPapers>;
 export type UserAnalytics = InferSelectModel<typeof userAnalytics>;

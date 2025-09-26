@@ -1,7 +1,7 @@
 "use server";
 
 import { db } from "@/db/connect";
-import { crashReports, conversations } from "@/db/schema";
+import { crashReports, conversations, conversationCrashReports } from "@/db/schema";
 import { withHighlightError } from "@/highlight-error";
 import { StructuredCrashReport } from "@/types/crash-report";
 import { ChatMessage } from "@/lib/openai";
@@ -51,10 +51,11 @@ async function _saveCrashReport(
     }
     const crashReport = crashReportResult[0];
 
-    // Update conversation with crash report reference
-    await db.update(conversations)
-      .set({ crashReportId: crashReport.id })
-      .where(eq(conversations.id, conversation.id));
+    // Create the relationship between conversation and crash report
+    await db.insert(conversationCrashReports).values({
+      conversationId: conversation.id,
+      crashReportId: crashReport.id
+    });
 
     return {
       success: true,
