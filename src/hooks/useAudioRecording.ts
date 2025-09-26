@@ -89,7 +89,7 @@ export function useAudioRecording(): UseAudioRecordingReturn {
       console.error('Error starting recording:', err);
       if (err instanceof Error) {
         if (err.name === 'NotAllowedError') {
-          setError('Microphone access denied. Please allow microphone access and try again.');
+          setError('Microphone access denied. Click the 🔒 icon in your address bar and allow microphone access, then try again.');
         } else if (err.name === 'NotFoundError') {
           setError('No microphone found. Please connect a microphone and try again.');
         } else if (err.name === 'NotSupportedError') {
