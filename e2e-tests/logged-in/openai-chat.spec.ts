@@ -13,7 +13,7 @@ test.describe('OpenAI Chat Integration', () => {
     
     // Verify welcome message is shown when no messages
     await expect(page.locator('text=Welcome!')).toBeVisible();
-    await expect(page.locator('text=Start by telling me about')).toBeVisible();
+    await expect(page.locator('text=Start by telling me about a recent crash')).toBeVisible();
   });
 
   test('can send a message and receive AI response', async ({ page }) => {
@@ -33,10 +33,11 @@ test.describe('OpenAI Chat Integration', () => {
     await expect(page.locator('.bg-blue-500.text-white').filter({ hasText: testMessage })).toBeVisible();
     
     // Wait for AI response (with generous timeout for API call)
-    await expect(page.locator('.bg-gray-100')).toBeVisible({ timeout: 30000 });
+    // Look for AI response that's not the loading indicator
+    await expect(page.locator('.bg-gray-100').filter({ hasNotText: 'Thinking...' })).toBeVisible({ timeout: 30000 });
     
     // Verify AI response is not empty and doesn't contain error message
-    const aiResponse = page.locator('.bg-gray-100').last();
+    const aiResponse = page.locator('.bg-gray-100').filter({ hasNotText: 'Thinking...' }).last();
     await expect(aiResponse).toBeVisible();
     
     // Check that we don't get the generic error message
