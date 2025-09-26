@@ -20,16 +20,26 @@ export function useAudioRecording(): UseAudioRecordingReturn {
   const [isSupported, setIsSupported] = useState(false);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const chunksRef = useRef<Blob[]>([]);
-  const mimeTypeRef = useRef<string>('');
 
-  // Check if browser supports audio recording (client-side only)
+  // Check if browser supports audio recording (Chrome-first approach)
   useEffect(() => {
     const checkSupport = () => {
-      const supported = typeof navigator !== 'undefined' && 
+      const hasBasicSupport = typeof navigator !== 'undefined' && 
         !!navigator.mediaDevices && 
         !!navigator.mediaDevices.getUserMedia &&
         typeof MediaRecorder !== 'undefined';
+      
+      // For MVP, prioritize Chrome compatibility
+      const isChrome = navigator.userAgent.includes('Chrome') && !navigator.userAgent.includes('Edg');
+      const hasWebMSupport = MediaRecorder.isTypeSupported('audio/webm;codecs=opus');
+      
+      // Support Chrome and browsers that support our preferred format
+      const supported = hasBasicSupport && (isChrome || hasWebMSupport);
       setIsSupported(supported);
+      
+      if (hasBasicSupport && !supported) {
+        console.log('ℹ️ Voice input optimized for Chrome. Other browsers coming soon!');
+      }
     };
     
     checkSupport();
@@ -41,7 +51,7 @@ export function useAudioRecording(): UseAudioRecordingReturn {
 
   const startRecording = useCallback(async () => {
     if (!isSupported) {
-      setError('Audio recording is not supported in this browser');
+      setError('Voice input is optimized for Chrome. Please use Chrome browser for voice features.');
       return;
     }
 
@@ -57,35 +67,11 @@ export function useAudioRecording(): UseAudioRecordingReturn {
         } 
       });
 
-      // Create MediaRecorder with Safari-compatible options
-      let mediaRecorder: MediaRecorder;
+      // Create MediaRecorder optimized for Chrome
+      const mimeType = 'audio/webm;codecs=opus';
+      const mediaRecorder = new MediaRecorder(stream, { mimeType });
       
-      // Try different MIME types for browser compatibility
-      const mimeTypes = [
-        'audio/webm;codecs=opus',  // Chrome, Firefox
-        'audio/webm',              // Fallback webm
-        'audio/mp4',               // Safari
-        'audio/aac',               // Safari fallback
-        ''                         // Let browser choose
-      ];
-      
-      let selectedMimeType = '';
-      for (const mimeType of mimeTypes) {
-        if (MediaRecorder.isTypeSupported(mimeType)) {
-          selectedMimeType = mimeType;
-          break;
-        }
-      }
-      
-      if (selectedMimeType) {
-        mediaRecorder = new MediaRecorder(stream, { mimeType: selectedMimeType });
-        mimeTypeRef.current = selectedMimeType;
-      } else {
-        mediaRecorder = new MediaRecorder(stream);
-        mimeTypeRef.current = 'audio/webm'; // Default fallback
-      }
-      
-      console.log('Using MIME type:', mimeTypeRef.current);
+      console.log('🎤 Recording with Chrome-optimized format:', mimeType);
 
       chunksRef.current = [];
 
@@ -107,9 +93,7 @@ export function useAudioRecording(): UseAudioRecordingReturn {
         } else if (err.name === 'NotFoundError') {
           setError('No microphone found. Please connect a microphone and try again.');
         } else if (err.name === 'NotSupportedError') {
-          setError('Audio recording not supported in this browser. Please try a different browser.');
-        } else if (err.message.includes('MediaRecorder')) {
-          setError('Recording format not supported. Please try a different browser or update your browser.');
+          setError('Voice input requires Chrome browser. Please switch to Chrome for voice features.');
         } else {
           setError('Failed to start recording. Please try again.');
         }
@@ -128,10 +112,10 @@ export function useAudioRecording(): UseAudioRecordingReturn {
       const mediaRecorder = mediaRecorderRef.current!;
       
       mediaRecorder.onstop = () => {
-        const audioBlob = new Blob(chunksRef.current, { type: mimeTypeRef.current });
+        const audioBlob = new Blob(chunksRef.current, { type: 'audio/webm;codecs=opus' });
         
         // Clean up
-        mediaRecorder.stream.getTracks().forEach(track => track.stop());
+        mediaRecorder.stream.getTracks().forEach((track: MediaStreamTrack) => track.stop());
         mediaRecorderRef.current = null;
         chunksRef.current = [];
         setIsRecording(false);
