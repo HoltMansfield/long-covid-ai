@@ -3,6 +3,8 @@
 import { useState, useRef, useEffect } from "react";
 import { ChatMessage } from "@/lib/openai";
 import { sendChatMessage } from "@/app/chat/actions";
+import { transcribeAudio } from "@/app/chat/speech-actions";
+import { useAudioRecording } from "@/hooks/useAudioRecording";
 
 interface ChatInterfaceProps {
   initialMessages?: ChatMessage[];
@@ -18,7 +20,18 @@ export default function ChatInterface({
   const [messages, setMessages] = useState<ChatMessage[]>(initialMessages);
   const [inputMessage, setInputMessage] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [isTranscribing, setIsTranscribing] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  
+  // Audio recording functionality
+  const {
+    isRecording,
+    isSupported: isAudioSupported,
+    error: audioError,
+    startRecording,
+    stopRecording,
+    clearError: clearAudioError
+  } = useAudioRecording();
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -73,6 +86,40 @@ export default function ChatInterface({
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
       sendMessage();
+    }
+  };
+
+  const handleVoiceInput = async () => {
+    if (isRecording) {
+      // Stop recording and transcribe
+      try {
+        setIsTranscribing(true);
+        const audioBlob = await stopRecording();
+        
+        if (audioBlob) {
+          // Create form data for transcription
+          const formData = new FormData();
+          formData.append('audio', audioBlob, 'recording.webm');
+          
+          // Transcribe audio
+          const result = await transcribeAudio(formData);
+          
+          if (result.success && result.text) {
+            setInputMessage(result.text.trim());
+          } else {
+            console.error('Transcription failed:', result.error);
+            // Could show error to user here
+          }
+        }
+      } catch (error) {
+        console.error('Error processing voice input:', error);
+      } finally {
+        setIsTranscribing(false);
+      }
+    } else {
+      // Start recording
+      clearAudioError();
+      await startRecording();
     }
   };
 
@@ -147,32 +194,88 @@ export default function ChatInterface({
 
       {/* Input */}
       <div className="p-4 border-t bg-gray-50 rounded-b-lg">
+        {/* Audio error display */}
+        {audioError && (
+          <div className="mb-3 p-2 bg-red-50 border border-red-200 rounded-lg">
+            <p className="text-sm text-red-700">{audioError}</p>
+            <button 
+              onClick={clearAudioError}
+              className="text-xs text-red-600 hover:text-red-800 underline mt-1"
+            >
+              Dismiss
+            </button>
+          </div>
+        )}
+        
         <div className="flex space-x-2">
-          <textarea
-            value={inputMessage}
-            onChange={(e) => setInputMessage(e.target.value)}
-            onKeyPress={handleKeyPress}
-            placeholder={
-              disabled
-                ? "Chat disabled"
-                : "Type your message... (Press Enter to send)"
-            }
-            disabled={disabled || isLoading}
-            className="flex-1 p-3 border border-gray-300 rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-100 disabled:cursor-not-allowed"
-            rows={2}
-          />
+          <div className="flex-1 relative">
+            <textarea
+              value={inputMessage}
+              onChange={(e) => setInputMessage(e.target.value)}
+              onKeyPress={handleKeyPress}
+              placeholder={
+                disabled
+                  ? "Chat disabled"
+                  : isRecording
+                  ? "Recording... Click the microphone to stop"
+                  : isTranscribing
+                  ? "Transcribing audio..."
+                  : "Type your message or use voice input... (Press Enter to send)"
+              }
+              disabled={disabled || isLoading || isRecording || isTranscribing}
+              className="w-full p-3 border border-gray-300 rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-100 disabled:cursor-not-allowed"
+              rows={2}
+            />
+          </div>
+          
+          {/* Voice input button */}
+          {isAudioSupported && (
+            <button
+              onClick={handleVoiceInput}
+              disabled={disabled || isLoading || isTranscribing}
+              className={`px-4 py-2 rounded-lg font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:cursor-not-allowed ${
+                isRecording
+                  ? "bg-red-500 text-white hover:bg-red-600 focus:ring-red-500"
+                  : "bg-gray-500 text-white hover:bg-gray-600 focus:ring-gray-500 disabled:bg-gray-300"
+              }`}
+              title={isRecording ? "Stop recording" : "Start voice input"}
+            >
+              {isTranscribing ? (
+                <span className="flex items-center">
+                  <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                  ...
+                </span>
+              ) : isRecording ? (
+                "🔴 Stop"
+              ) : (
+                "🎤 Voice"
+              )}
+            </button>
+          )}
+          
           <button
             onClick={sendMessage}
-            disabled={!inputMessage.trim() || isLoading || disabled}
+            disabled={!inputMessage.trim() || isLoading || disabled || isRecording || isTranscribing}
             className="px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
           >
             {isLoading ? "Sending..." : "Send"}
           </button>
         </div>
-        <p className="text-xs text-gray-500 mt-2">
-          💡 Tip: Keep responses simple. I understand that brain fog can make
-          complex conversations difficult.
-        </p>
+        
+        <div className="flex justify-between items-center mt-2">
+          <p className="text-xs text-gray-500">
+            💡 Tip: Keep responses simple. I understand that brain fog can make
+            complex conversations difficult.
+          </p>
+          {isAudioSupported && (
+            <p className="text-xs text-gray-400">
+              🎤 Voice input available
+            </p>
+          )}
+        </div>
       </div>
     </div>
   );
