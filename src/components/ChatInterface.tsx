@@ -275,9 +275,13 @@ export default function ChatInterface({
             💡 Tip: Keep responses simple. I understand that brain fog can make
             complex conversations difficult.
           </p>
-          {isMounted && isAudioSupported && (
+          {isMounted && (
             <p className="text-xs text-gray-400">
-              🎤 Voice input available
+              {isAudioSupported ? (
+                "🎤 Voice input available"
+              ) : (
+                "💬 Voice input optimized for Chrome browser"
+              )}
             </p>
           )}
         </div>
