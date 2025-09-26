@@ -57,8 +57,25 @@ export function useAudioRecording(): UseAudioRecordingReturn {
 
     try {
       setError(null);
+      console.log('🎤 Requesting microphone access...');
+      
+      // Check microphone permissions first
+      if (navigator.permissions) {
+        try {
+          const permission = await navigator.permissions.query({ name: 'microphone' as PermissionName });
+          console.log('🔍 Current microphone permission state:', permission.state);
+          
+          if (permission.state === 'denied') {
+            setError('Microphone access is blocked. Please click the 🔒 icon in your address bar and allow microphone access.');
+            return;
+          }
+        } catch (permError) {
+          console.log('⚠️ Could not check permissions:', permError);
+        }
+      }
       
       // Request microphone access
+      console.log('📡 Calling getUserMedia...');
       const stream = await navigator.mediaDevices.getUserMedia({ 
         audio: {
           echoCancellation: true,
@@ -66,6 +83,8 @@ export function useAudioRecording(): UseAudioRecordingReturn {
           sampleRate: 44100,
         } 
       });
+      
+      console.log('✅ Microphone access granted, stream:', stream);
 
       // Create MediaRecorder optimized for Chrome
       const mimeType = 'audio/webm;codecs=opus';
@@ -86,7 +105,13 @@ export function useAudioRecording(): UseAudioRecordingReturn {
       setIsRecording(true);
 
     } catch (err) {
-      console.error('Error starting recording:', err);
+      console.error('❌ Error starting recording:', err);
+      console.error('Error details:', {
+        name: err instanceof Error ? err.name : 'Unknown',
+        message: err instanceof Error ? err.message : 'Unknown error',
+        stack: err instanceof Error ? err.stack : 'No stack trace'
+      });
+      
       if (err instanceof Error) {
         if (err.name === 'NotAllowedError') {
           setError('Microphone access denied. Click the 🔒 icon in your address bar and allow microphone access, then try again.');
@@ -95,7 +120,7 @@ export function useAudioRecording(): UseAudioRecordingReturn {
         } else if (err.name === 'NotSupportedError') {
           setError('Voice input requires Chrome browser. Please switch to Chrome for voice features.');
         } else {
-          setError('Failed to start recording. Please try again.');
+          setError(`Failed to start recording: ${err.message}. Please try again.`);
         }
       } else {
         setError('Failed to start recording. Please try again.');
