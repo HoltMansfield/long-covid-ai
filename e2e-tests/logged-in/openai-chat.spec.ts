@@ -11,9 +11,9 @@ test.describe('OpenAI Chat Integration', () => {
     await expect(page.locator('textarea')).toBeVisible();
     await expect(page.locator('button:has-text("Send")')).toBeVisible();
     
-    // Verify welcome message is shown when no messages
-    await expect(page.locator('text=Welcome!')).toBeVisible();
-    await expect(page.locator('text=Start by telling me about a recent crash')).toBeVisible();
+    // Verify initial AI message is shown (since chat starts with crash report interview)
+    await expect(page.locator('text=I understand you\'ve experienced a crash')).toBeVisible();
+    await expect(page.locator('text=on a scale of 1 to 10')).toBeVisible();
   });
 
   test('can send a message and receive AI response', async ({ page }) => {
