@@ -7,45 +7,24 @@ export default function HighlightProvider({ children }: { children: React.ReactN
   const isInitialized = useRef(false);
 
   useEffect(() => {
-    // Only initialize once
-    if (!isInitialized.current) {
-      H.init("d0oevl36hees769uqvl0");
-      isInitialized.current = true;
-    }
+    // Temporarily disable Highlight.io completely to resolve session data errors
+    // TODO: Re-enable once the session data conflict is resolved
+    console.log('ℹ️ Highlight.io temporarily disabled to prevent console errors');
     
-    // Check if user is logged in and identify them
-    const checkUserSession = () => {
-      // Check for session cookie (this is a simple check)
-      const cookies = document.cookie.split(';');
-      const sessionCookie = cookies.find(cookie => cookie.trim().startsWith('session_user='));
-      
-      if (sessionCookie) {
-        const userEmail = sessionCookie.split('=')[1];
-        if (userEmail && userEmail !== '' && userEmail !== lastIdentifiedUser.current) {
-          // Only identify if this is a different user than last time
-          H.identify(userEmail);
-          lastIdentifiedUser.current = userEmail;
-        }
-      } else if (lastIdentifiedUser.current !== null) {
-        // User logged out - clear the last identified user
-        lastIdentifiedUser.current = null;
-      }
-    };
-    
-    // Identify user on initial load and when component mounts
-    checkUserSession();
-    
-    // Optional: Listen for storage events if you want to detect login/logout in other tabs
-    const handleStorageChange = (e: StorageEvent) => {
-      if (e.key === 'user_session_changed') {
-        checkUserSession();
-      }
-    };
-    
-    window.addEventListener('storage', handleStorageChange);
+    // Only initialize once (when we re-enable)
+    // if (!isInitialized.current) {
+    //   try {
+    //     H.init("d0oevl36hees769uqvl0");
+    //     isInitialized.current = true;
+    //     console.log('✅ Highlight.io initialized');
+    //   } catch (error) {
+    //     console.warn('⚠️ Highlight.io initialization failed:', error);
+    //     return;
+    //   }
+    // }
     
     return () => {
-      window.removeEventListener('storage', handleStorageChange);
+      // Cleanup placeholder
     };
   }, []); // Empty dependency array - only run once
   
