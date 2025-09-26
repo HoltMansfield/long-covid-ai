@@ -20,6 +20,7 @@ export function useAudioRecording(): UseAudioRecordingReturn {
   const [isSupported, setIsSupported] = useState(false);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const chunksRef = useRef<Blob[]>([]);
+  const mimeTypeRef = useRef<string>('');
 
   // Check if browser supports audio recording (client-side only)
   useEffect(() => {
@@ -56,10 +57,35 @@ export function useAudioRecording(): UseAudioRecordingReturn {
         } 
       });
 
-      // Create MediaRecorder
-      const mediaRecorder = new MediaRecorder(stream, {
-        mimeType: 'audio/webm;codecs=opus'
-      });
+      // Create MediaRecorder with Safari-compatible options
+      let mediaRecorder: MediaRecorder;
+      
+      // Try different MIME types for browser compatibility
+      const mimeTypes = [
+        'audio/webm;codecs=opus',  // Chrome, Firefox
+        'audio/webm',              // Fallback webm
+        'audio/mp4',               // Safari
+        'audio/aac',               // Safari fallback
+        ''                         // Let browser choose
+      ];
+      
+      let selectedMimeType = '';
+      for (const mimeType of mimeTypes) {
+        if (MediaRecorder.isTypeSupported(mimeType)) {
+          selectedMimeType = mimeType;
+          break;
+        }
+      }
+      
+      if (selectedMimeType) {
+        mediaRecorder = new MediaRecorder(stream, { mimeType: selectedMimeType });
+        mimeTypeRef.current = selectedMimeType;
+      } else {
+        mediaRecorder = new MediaRecorder(stream);
+        mimeTypeRef.current = 'audio/webm'; // Default fallback
+      }
+      
+      console.log('Using MIME type:', mimeTypeRef.current);
 
       chunksRef.current = [];
 
@@ -80,6 +106,10 @@ export function useAudioRecording(): UseAudioRecordingReturn {
           setError('Microphone access denied. Please allow microphone access and try again.');
         } else if (err.name === 'NotFoundError') {
           setError('No microphone found. Please connect a microphone and try again.');
+        } else if (err.name === 'NotSupportedError') {
+          setError('Audio recording not supported in this browser. Please try a different browser.');
+        } else if (err.message.includes('MediaRecorder')) {
+          setError('Recording format not supported. Please try a different browser or update your browser.');
         } else {
           setError('Failed to start recording. Please try again.');
         }
@@ -98,7 +128,7 @@ export function useAudioRecording(): UseAudioRecordingReturn {
       const mediaRecorder = mediaRecorderRef.current!;
       
       mediaRecorder.onstop = () => {
-        const audioBlob = new Blob(chunksRef.current, { type: 'audio/webm' });
+        const audioBlob = new Blob(chunksRef.current, { type: mimeTypeRef.current });
         
         // Clean up
         mediaRecorder.stream.getTracks().forEach(track => track.stop());
