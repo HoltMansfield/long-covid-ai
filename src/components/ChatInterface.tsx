@@ -21,6 +21,7 @@ export default function ChatInterface({
   const [inputMessage, setInputMessage] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [isTranscribing, setIsTranscribing] = useState(false);
+  const [isMounted, setIsMounted] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   
   // Audio recording functionality
@@ -40,6 +41,10 @@ export default function ChatInterface({
   useEffect(() => {
     scrollToBottom();
   }, [messages]);
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
 
   const sendMessage = async () => {
     if (!inputMessage.trim() || isLoading || disabled) return;
@@ -228,8 +233,8 @@ export default function ChatInterface({
             />
           </div>
           
-          {/* Voice input button */}
-          {isAudioSupported && (
+          {/* Voice input button - only show after hydration */}
+          {isMounted && isAudioSupported && (
             <button
               onClick={handleVoiceInput}
               disabled={disabled || isLoading || isTranscribing}
@@ -270,7 +275,7 @@ export default function ChatInterface({
             💡 Tip: Keep responses simple. I understand that brain fog can make
             complex conversations difficult.
           </p>
-          {isAudioSupported && (
+          {isMounted && isAudioSupported && (
             <p className="text-xs text-gray-400">
               🎤 Voice input available
             </p>

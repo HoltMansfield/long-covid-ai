@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useCallback } from 'react';
+import { useState, useRef, useCallback, useEffect } from 'react';
 
 export interface AudioRecordingState {
   isRecording: boolean;
@@ -17,14 +17,22 @@ export interface UseAudioRecordingReturn extends AudioRecordingState {
 export function useAudioRecording(): UseAudioRecordingReturn {
   const [isRecording, setIsRecording] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [isSupported, setIsSupported] = useState(false);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const chunksRef = useRef<Blob[]>([]);
 
-  // Check if browser supports audio recording
-  const isSupported = typeof navigator !== 'undefined' && 
-    !!navigator.mediaDevices && 
-    !!navigator.mediaDevices.getUserMedia &&
-    typeof MediaRecorder !== 'undefined';
+  // Check if browser supports audio recording (client-side only)
+  useEffect(() => {
+    const checkSupport = () => {
+      const supported = typeof navigator !== 'undefined' && 
+        !!navigator.mediaDevices && 
+        !!navigator.mediaDevices.getUserMedia &&
+        typeof MediaRecorder !== 'undefined';
+      setIsSupported(supported);
+    };
+    
+    checkSupport();
+  }, []);
 
   const clearError = useCallback(() => {
     setError(null);
