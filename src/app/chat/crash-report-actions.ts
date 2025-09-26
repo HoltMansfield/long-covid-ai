@@ -20,14 +20,19 @@ async function _saveCrashReport(
 ): Promise<SaveCrashReportResult> {
   try {
     // First, save the conversation
-    const [conversation] = await db.insert(conversations).values({
+    const conversationResult = await db.insert(conversations).values({
       userId,
       messages: conversationMessages,
       status: 'completed'
     }).returning();
+    
+    if (!Array.isArray(conversationResult) || conversationResult.length === 0) {
+      throw new Error('Failed to create conversation');
+    }
+    const conversation = conversationResult[0];
 
     // Then save the crash report with reference to conversation
-    const [crashReport] = await db.insert(crashReports).values({
+    const crashReportResult = await db.insert(crashReports).values({
       userId,
       severity: crashReportData.severity,
       triggers: crashReportData.triggers,
@@ -40,6 +45,11 @@ async function _saveCrashReport(
       aiSummary: crashReportData.aiSummary,
       rawConversation: conversationMessages
     }).returning();
+    
+    if (!Array.isArray(crashReportResult) || crashReportResult.length === 0) {
+      throw new Error('Failed to create crash report');
+    }
+    const crashReport = crashReportResult[0];
 
     // Update conversation with crash report reference
     await db.update(conversations)
@@ -70,7 +80,7 @@ async function _updateCrashReport(
 ): Promise<SaveCrashReportResult> {
   try {
     // Update the crash report
-    const [updatedCrashReport] = await db.update(crashReports)
+    const updatedCrashReportResult = await db.update(crashReports)
       .set({
         severity: crashReportData.severity,
         triggers: crashReportData.triggers,
@@ -85,6 +95,11 @@ async function _updateCrashReport(
       })
       .where(eq(crashReports.id, crashReportId))
       .returning();
+    
+    if (!Array.isArray(updatedCrashReportResult) || updatedCrashReportResult.length === 0) {
+      throw new Error('Failed to update crash report');
+    }
+    const updatedCrashReport = updatedCrashReportResult[0];
 
     // Update the associated conversation
     if (updatedCrashReport.conversationId) {
