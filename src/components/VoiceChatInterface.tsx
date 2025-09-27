@@ -112,6 +112,21 @@ export default function VoiceChatInterface({
       utterance.onend = () => {
         setIsSpeaking(false);
         console.log('✅ Speech synthesis ended');
+        
+        // Auto-start listening after AI finishes speaking
+        setTimeout(() => {
+          if (recognitionRef.current && !isListening) {
+            console.log('🎤 Auto-starting listening after AI response');
+            setError(null);
+            setIsListening(true);
+            try {
+              recognitionRef.current.start();
+            } catch (error) {
+              console.error('Error auto-starting recognition:', error);
+              setIsListening(false);
+            }
+          }
+        }, 500); // Small delay to ensure speech has fully ended
       };
       
       utterance.onerror = (event) => {
@@ -284,14 +299,18 @@ export default function VoiceChatInterface({
                 ? "bg-red-500 hover:bg-red-600 focus:ring-red-300 animate-pulse scale-110"
                 : isSpeaking
                 ? "bg-purple-500 focus:ring-purple-300 cursor-not-allowed"
-                : "bg-green-500 hover:bg-green-600 focus:ring-green-300 disabled:bg-gray-300 hover:scale-105"
+                : conversationCount === 0
+                ? "bg-green-500 hover:bg-green-600 focus:ring-green-300 disabled:bg-gray-300 hover:scale-105"
+                : "bg-gray-400 hover:bg-gray-500 focus:ring-gray-300 disabled:bg-gray-300"
             }`}
             title={
               isListening 
-                ? "Stop listening" 
+                ? "Click to stop listening" 
                 : isSpeaking 
                 ? "AI is speaking..." 
-                : "Start speaking"
+                : conversationCount === 0
+                ? "Click to start our conversation"
+                : "Click if you need to speak again"
             }
           >
             {isListening ? (
@@ -330,11 +349,13 @@ export default function VoiceChatInterface({
                 ? "Processing your message..."
                 : isSpeaking
                 ? "I'm responding to you..."
-                : "Click the microphone and speak naturally"
+                : conversationCount === 0
+                ? "Click the microphone to start our conversation"
+                : "I'll start listening automatically after I finish speaking"
               }
             </p>
             <p className="text-sm text-gray-500">
-              💡 This is a voice-only conversation. Speak clearly and I'll respond with speech.
+              💡 After I ask a question, I'll automatically start listening for your response.
             </p>
           </div>
         </div>
