@@ -29,6 +29,7 @@
     "e2e:test:logged-in": "npx wait-on http://localhost:3001 && dotenv -e .env.e2e -- playwright test --project=logged-in"
   },
   "dependencies": {
+    "@alan-ai/alan-sdk-web": "^1.8.95",
     "@highlight-run/next": "^7.9.23",
     "@highlight-run/node": "^3.12.7",
     "@hookform/resolvers": "^5.0.1",

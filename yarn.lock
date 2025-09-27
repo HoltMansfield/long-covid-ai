@@ -37,6 +37,11 @@
     "@ai-sdk/provider-utils" "2.2.8"
     zod-to-json-schema "^3.24.1"
 
+"@alan-ai/alan-sdk-web@^1.8.95":
+  version "1.8.95"
+  resolved "https://registry.npmjs.org/@alan-ai/alan-sdk-web/-/alan-sdk-web-1.8.95.tgz"
+  integrity sha512-KJyuUuhu/DJ7WWpRb2+pP7+WYn/GL3lLQSGq5G7+Q+kl7DFxxQjipr8p6NPC6P8pe/YbGJT2KOGhzP7gaRWn5g==
+
 "@alloc/quick-lru@^5.2.0":
   version "5.2.0"
   resolved "https://registry.npmjs.org/@alloc/quick-lru/-/quick-lru-5.2.0.tgz"
