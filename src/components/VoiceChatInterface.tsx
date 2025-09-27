@@ -186,7 +186,7 @@ export default function VoiceChatInterface({
   useEffect(() => {
     if (isSupported && conversationCount === 0 && hasUserInteracted) {
       setTimeout(() => {
-        speakText("Hello! I'm your AI assistant for Long COVID support. How are you feeling today?");
+        speakText("I understand you've experienced a crash. I'm here to help you understand what might have triggered it. Let's start simple - on a scale of 1 to 10, how severe was this crash for you?");
       }, 500);
     }
   }, [isSupported, hasUserInteracted]);
