@@ -7,21 +7,18 @@ export default function HighlightProvider({ children }: { children: React.ReactN
   const isInitialized = useRef(false);
 
   useEffect(() => {
-    // Temporarily disable Highlight.io completely to resolve session data errors
-    // TODO: Re-enable once the session data conflict is resolved
-    console.log('ℹ️ Highlight.io temporarily disabled to prevent console errors');
-    
-    // Only initialize once (when we re-enable)
-    // if (!isInitialized.current) {
-    //   try {
-    //     H.init("d0oevl36hees769uqvl0");
-    //     isInitialized.current = true;
-    //     console.log('✅ Highlight.io initialized');
-    //   } catch (error) {
-    //     console.warn('⚠️ Highlight.io initialization failed:', error);
-    //     return;
-    //   }
-    // }
+    // Only initialize once
+    if (!isInitialized.current) {
+      try {
+        H.init("d0oevl36hees769uqvl0");
+        isInitialized.current = true;
+        console.log('✅ Highlight.io initialized successfully');
+      } catch (error) {
+        console.warn('⚠️ Highlight.io initialization failed:', error);
+        // Don't break the app if Highlight.io fails to initialize
+        return;
+      }
+    }
     
     return () => {
       // Cleanup placeholder
