@@ -95,32 +95,54 @@ export default function VoiceChatInterface({
   const speakText = (text: string) => {
     if (!synthRef.current) return;
     
-    // Cancel any ongoing speech
-    synthRef.current.cancel();
-    
-    const utterance = new SpeechSynthesisUtterance(text);
-    utterance.rate = 0.9; // Slightly slower for clarity
-    utterance.pitch = 1;
-    utterance.volume = 1;
-    
-    utterance.onstart = () => {
-      setIsSpeaking(true);
-    };
-    
-    utterance.onend = () => {
+    try {
+      // Cancel any ongoing speech
+      synthRef.current.cancel();
+      
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.rate = 0.9; // Slightly slower for clarity
+      utterance.pitch = 1;
+      utterance.volume = 1;
+      
+      utterance.onstart = () => {
+        setIsSpeaking(true);
+        console.log('✅ Speech synthesis started');
+      };
+      
+      utterance.onend = () => {
+        setIsSpeaking(false);
+        console.log('✅ Speech synthesis ended');
+      };
+      
+      utterance.onerror = (event) => {
+        console.error('❌ Speech synthesis error:', event);
+        setIsSpeaking(false);
+        // Don't show error to user for synthesis issues, just log it
+      };
+      
+      // Check if speech synthesis is available and not blocked
+      if (synthRef.current.speaking) {
+        console.log('⚠️ Speech synthesis already speaking, canceling...');
+        synthRef.current.cancel();
+        setTimeout(() => {
+          synthRef.current?.speak(utterance);
+        }, 100);
+      } else {
+        synthRef.current.speak(utterance);
+      }
+    } catch (error) {
+      console.error('❌ Error in speakText:', error);
       setIsSpeaking(false);
-    };
-    
-    utterance.onerror = (event) => {
-      console.error('Speech synthesis error:', event);
-      setIsSpeaking(false);
-    };
-    
-    synthRef.current.speak(utterance);
+    }
   };
 
   const startListening = () => {
     if (!recognitionRef.current || !isSupported || isSpeaking) return;
+    
+    // Mark that user has interacted (enables speech synthesis)
+    if (!hasUserInteracted) {
+      setHasUserInteracted(true);
+    }
     
     // Stop any ongoing speech first
     if (synthRef.current) {
@@ -158,14 +180,16 @@ export default function VoiceChatInterface({
     setError(null);
   };
 
-  // Auto-start with welcome message
+  // Welcome message after first user interaction
+  const [hasUserInteracted, setHasUserInteracted] = useState(false);
+  
   useEffect(() => {
-    if (isSupported && conversationCount === 0) {
+    if (isSupported && conversationCount === 0 && hasUserInteracted) {
       setTimeout(() => {
         speakText("Hello! I'm your AI assistant for Long COVID support. How are you feeling today?");
-      }, 1000);
+      }, 500);
     }
-  }, [isSupported]);
+  }, [isSupported, hasUserInteracted]);
 
   if (!isSupported) {
     return (
@@ -201,7 +225,9 @@ export default function VoiceChatInterface({
           <h2 className="text-2xl font-bold text-gray-900 mb-2">Voice Assistant</h2>
           <p className="text-gray-600">
             {conversationCount === 0 
-              ? "Click the microphone to start our conversation"
+              ? hasUserInteracted 
+                ? "I'll greet you in just a moment..."
+                : "Click the microphone to start our conversation"
               : `Conversation turn ${conversationCount}`
             }
           </p>
