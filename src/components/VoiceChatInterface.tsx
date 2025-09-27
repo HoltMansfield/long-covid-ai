@@ -22,6 +22,17 @@ export default function VoiceChatInterface({
   const [conversationCount, setConversationCount] = useState(0);
   const recognitionRef = useRef<SpeechRecognition | null>(null);
   const synthRef = useRef<SpeechSynthesis | null>(null);
+  const isListeningRef = useRef(isListening);
+  const isLoadingRef = useRef(isLoading);
+
+  // Keep refs updated with current state
+  useEffect(() => {
+    isListeningRef.current = isListening;
+  }, [isListening]);
+
+  useEffect(() => {
+    isLoadingRef.current = isLoading;
+  }, [isLoading]);
 
   // Check for Speech Recognition and Speech Synthesis support
   useEffect(() => {
@@ -115,18 +126,33 @@ export default function VoiceChatInterface({
         
         // Auto-start listening after AI finishes speaking
         setTimeout(() => {
-          if (recognitionRef.current && !isListening) {
+          console.log('🎤 Attempting auto-start listening...');
+          console.log('Recognition ref exists:', !!recognitionRef.current);
+          console.log('Currently listening (ref):', isListeningRef.current);
+          console.log('Is loading (ref):', isLoadingRef.current);
+          console.log('Is disabled:', disabled);
+          
+          if (recognitionRef.current && !isListeningRef.current && !isLoadingRef.current && !disabled) {
             console.log('🎤 Auto-starting listening after AI response');
             setError(null);
             setIsListening(true);
             try {
               recognitionRef.current.start();
+              console.log('✅ Auto-listening started successfully');
             } catch (error) {
-              console.error('Error auto-starting recognition:', error);
+              console.error('❌ Error auto-starting recognition:', error);
               setIsListening(false);
+              // Show this error to user since auto-listening failed
+              setError('Auto-listening failed. Click the microphone to continue.');
             }
+          } else {
+            console.log('❌ Cannot auto-start listening - conditions not met');
+            console.log('  - Recognition ref:', !!recognitionRef.current);
+            console.log('  - Not listening:', !isListeningRef.current);
+            console.log('  - Not loading:', !isLoadingRef.current);
+            console.log('  - Not disabled:', !disabled);
           }
-        }, 500); // Small delay to ensure speech has fully ended
+        }, 1000); // Increased delay to ensure speech has fully ended
       };
       
       utterance.onerror = (event) => {
