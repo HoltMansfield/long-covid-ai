@@ -1,6 +1,6 @@
 import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
-import AlanVoiceChatInterface from '@/components/AlanVoiceChatInterface';
+import SpeechlyVoiceChatInterface from '@/components/SpeechlyVoiceChatInterface';
 import { createCrashReportInterview } from '@/lib/openai';
 
 export default async function VoiceChatPage() {
@@ -51,7 +51,7 @@ export default async function VoiceChatPage() {
         </div>
 
         <div className="h-[600px]">
-          <AlanVoiceChatInterface initialMessages={initialMessages} />
+          <SpeechlyVoiceChatInterface initialMessages={initialMessages} />
         </div>
 
         <div className="mt-6 bg-white rounded-lg border p-4">

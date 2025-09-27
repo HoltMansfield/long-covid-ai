@@ -29,7 +29,6 @@
     "e2e:test:logged-in": "npx wait-on http://localhost:3001 && dotenv -e .env.e2e -- playwright test --project=logged-in"
   },
   "dependencies": {
-    "@alan-ai/alan-sdk-web": "^1.8.95",
     "@highlight-run/next": "^7.9.23",
     "@highlight-run/node": "^3.12.7",
     "@hookform/resolvers": "^5.0.1",
@@ -37,6 +36,8 @@
     "@radix-ui/react-slot": "^1.2.0",
     "@radix-ui/themes": "^3.2.1",
     "@react-email/components": "^0.0.41",
+    "@speechly/browser-client": "^2.6.6",
+    "@speechly/react-client": "^2.2.4",
     "ai": "^4.0.0",
     "bcryptjs": "^3.0.2",
     "class-variance-authority": "^0.7.1",

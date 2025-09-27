@@ -13,7 +13,7 @@ declare namespace NodeJS {
     MIGRATIONS_PATH?: string;
     RESEND_API_KEY?: string;
     HIGHLIGHT_API_KEY?: string;
-    ALAN_AI_KEY?: string;
+    SPEECHLY_APP_ID?: string;
     E2E_URL?: string;
     DEBUG?: string;
     LOG_LEVEL?: "trace" | "debug" | "info" | "warn" | "error" | "fatal";

@@ -37,11 +37,6 @@
     "@ai-sdk/provider-utils" "2.2.8"
     zod-to-json-schema "^3.24.1"
 
-"@alan-ai/alan-sdk-web@^1.8.95":
-  version "1.8.95"
-  resolved "https://registry.npmjs.org/@alan-ai/alan-sdk-web/-/alan-sdk-web-1.8.95.tgz"
-  integrity sha512-KJyuUuhu/DJ7WWpRb2+pP7+WYn/GL3lLQSGq5G7+Q+kl7DFxxQjipr8p6NPC6P8pe/YbGJT2KOGhzP7gaRWn5g==
-
 "@alloc/quick-lru@^5.2.0":
   version "5.2.0"
   resolved "https://registry.npmjs.org/@alloc/quick-lru/-/quick-lru-5.2.0.tgz"
@@ -1537,6 +1532,21 @@
   resolved "https://registry.npmjs.org/@sideway/pinpoint/-/pinpoint-2.0.0.tgz"
   integrity sha512-RNiOoTPkptFtSVzQevY/yWtZwf/RxyVnPy/OcA9HBM3MlGDnBEYL5B41H0MTn0Uec8Hi+2qUtTfG2WWZBmMejQ==
 
+"@speechly/browser-client@^2.6.5", "@speechly/browser-client@^2.6.6":
+  version "2.6.6"
+  resolved "https://registry.npmjs.org/@speechly/browser-client/-/browser-client-2.6.6.tgz"
+  integrity sha512-yhqLMqaYefrS3ylZtDCB6pTrS8U6+TQzJ90sXBZLRWZSzRTRbBBZK9Rb0PwJmkN/Lo/NK2jB+5Jb5W6g6h+dMA==
+  dependencies:
+    base-64 "^0.1.0"
+    uuid "^8.0.0"
+
+"@speechly/react-client@^2.2.4":
+  version "2.2.4"
+  resolved "https://registry.npmjs.org/@speechly/react-client/-/react-client-2.2.4.tgz"
+  integrity sha512-9FVdZNtRcgxCaTBKEbOmtnuGSlkFpsDNyKxqkWhZ7IHQrpBvSHRkkArWN5yLH5UDoPJ/M0RCcP7mse5ZaTd/oQ==
+  dependencies:
+    "@speechly/browser-client" "^2.6.5"
+
 "@standard-schema/utils@^0.3.0":
   version "0.3.0"
   resolved "https://registry.npmjs.org/@standard-schema/utils/-/utils-0.3.0.tgz"
@@ -2043,6 +2053,11 @@ balanced-match@^1.0.0:
   version "1.0.2"
   resolved "https://registry.npmjs.org/balanced-match/-/balanced-match-1.0.2.tgz"
   integrity sha512-3oSeUO0TMV67hN1AmbXsK4yaqU7tjiHlbxRDZOpH0KW9+CeX4bRAaX0Anxt0tx2MrpRpWwQaPwIlISEJhYU5Pw==
+
+base-64@^0.1.0:
+  version "0.1.0"
+  resolved "https://registry.npmjs.org/base-64/-/base-64-0.1.0.tgz"
+  integrity sha512-Y5gU45svrR5tI2Vt/X9GPd3L0HNIKzGu202EjxrXMpuc2V2CiKgemAbUUsqYmZJvPtCXoUKjNZwBJzsNScUbXA==
 
 bcryptjs@^3.0.2:
   version "3.0.2"
@@ -4569,7 +4584,7 @@ react-style-singleton@^2.2.2, react-style-singleton@^2.2.3:
     get-nonce "^1.0.0"
     tslib "^2.0.0"
 
-"react@^16.11.0 || ^17.0.0 || ^18.0.0 || ^19.0.0", "react@^16.5.1 || ^17.0.0 || ^18.0.0 || ^19.0.0", "react@^16.8 || ^17.0 || ^18.0 || ^19.0 || ^19.0.0-rc", "react@^16.8.0 || ^17 || ^18 || ^19", "react@^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0", "react@^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0 || ^19.0.0-rc", "react@^18 || ^19 || ^19.0.0-rc", "react@^18.0 || ^19.0", "react@^18.0 || ^19.0 || ^19.0.0-rc", "react@^18.2.0 || 19.0.0-rc-de68d2f4-20241204 || ^19.0.0", react@^19.0.0, react@^19.1.0, "react@>= 16.8.0 || 17.x.x || ^18.0.0-0 || ^19.0.0-0", react@>=16, react@>=16.8.0, react@>=17, "react@16.8 || ^17.0 || ^18.0 || ^19.0 || ^19.0.0-rc":
+"react@^16.11.0 || ^17.0.0 || ^18.0.0 || ^19.0.0", "react@^16.5.1 || ^17.0.0 || ^18.0.0 || ^19.0.0", "react@^16.8 || ^17.0 || ^18.0 || ^19.0 || ^19.0.0-rc", "react@^16.8.0 || ^17 || ^18 || ^19", "react@^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0", "react@^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0 || ^19.0.0-rc", "react@^18 || ^19 || ^19.0.0-rc", "react@^18.0 || ^19.0", "react@^18.0 || ^19.0 || ^19.0.0-rc", "react@^18.2.0 || 19.0.0-rc-de68d2f4-20241204 || ^19.0.0", react@^19.0.0, react@^19.1.0, "react@>= 16.8.0 || 17.x.x || ^18.0.0-0 || ^19.0.0-0", react@>=16, react@>=16.8.0, react@>=16.9.0, react@>=17, "react@16.8 || ^17.0 || ^18.0 || ^19.0 || ^19.0.0-rc":
   version "19.1.0"
   resolved "https://registry.npmjs.org/react/-/react-19.1.0.tgz"
   integrity sha512-FS+XFBNvn3GTAWq26joslQgWNoFu08F4kl0J4CgdNKADkdSGXQyTCnKteIAJy96Br6YbpEU1LSzV5dYtjMkMDg==
@@ -5346,6 +5361,11 @@ uuid@^11.1.0:
   version "11.1.0"
   resolved "https://registry.npmjs.org/uuid/-/uuid-11.1.0.tgz"
   integrity sha512-0/A9rDy9P7cJ+8w1c9WD9V//9Wj15Ce2MPz8Ri6032usz+NfePxx5AcN3bN+r6ZL6jEo066/yNYB3tn4pQEx+A==
+
+uuid@^8.0.0:
+  version "8.3.2"
+  resolved "https://registry.npmjs.org/uuid/-/uuid-8.3.2.tgz"
+  integrity sha512-+NYs2QeMWy+GWFOEm9xnn6HCDp0l7QBD7ml8zLUmJ+93Q5NF0NocErnwkTkXVFNiX3/fpC6afS8Dhb/gz7R7eg==
 
 v8-compile-cache-lib@^3.0.1:
   version "3.0.1"
