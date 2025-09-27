@@ -13,7 +13,8 @@ declare namespace NodeJS {
     MIGRATIONS_PATH?: string;
     RESEND_API_KEY?: string;
     HIGHLIGHT_API_KEY?: string;
-    SPEECHLY_APP_ID?: string;
+    VOICEFLOW_VERSION_ID?: string;
+    VOICEFLOW_API_KEY?: string;
     E2E_URL?: string;
     DEBUG?: string;
     LOG_LEVEL?: "trace" | "debug" | "info" | "warn" | "error" | "fatal";
