@@ -14,3 +14,12 @@
 
 [[plugins]]
   package = "@netlify/plugin-nextjs"
+
+# Headers for microphone permissions and security
+[[headers]]
+  for = "/*"
+  [headers.values]
+    # Enable microphone and camera permissions for voice input
+    Permissions-Policy = "microphone=*, camera=*, geolocation=(), payment=(), usb=()"
+    # Content Security Policy allowing necessary resources
+    Content-Security-Policy = "default-src 'self'; script-src 'self' 'unsafe-eval' 'unsafe-inline' https://unpkg.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:; connect-src 'self' https://api.openai.com https://prod.highlight.io; media-src 'self' blob:; worker-src 'self' blob:;"
