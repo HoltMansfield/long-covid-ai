@@ -1,9 +1,8 @@
 import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
-import ChatInterface from '@/components/ChatInterface';
-import { createCrashReportInterview } from '@/lib/openai';
+import Link from 'next/link';
 
-export default async function ChatPage() {
+export default async function ChatLandingPage() {
   // Check if user is logged in
   const cookieStore = await cookies();
   const sessionUser = cookieStore.get('session_user');
@@ -12,22 +11,105 @@ export default async function ChatPage() {
     redirect('/login');
   }
 
-  // Initialize with crash report interview
-  const initialMessages = createCrashReportInterview();
-
   return (
     <div className="min-h-screen bg-gray-50 py-8">
       <div className="max-w-4xl mx-auto px-4">
-        <div className="mb-6">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">
+        <div className="mb-8 text-center">
+          <h1 className="text-4xl font-bold text-gray-900 mb-4">
             AI Support Assistant
           </h1>
-          <p className="text-gray-600">
-            Get personalized support for managing your Long COVID symptoms and PEM crashes.
+          <p className="text-xl text-gray-600 mb-8">
+            Choose how you'd like to communicate with your AI assistant
           </p>
         </div>
 
-        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+        <div className="grid md:grid-cols-2 gap-8 mb-8">
+          {/* Text Chat Option */}
+          <Link href="/chat/text" className="group">
+            <div className="bg-white rounded-xl shadow-lg border border-gray-200 p-8 hover:shadow-xl transition-all duration-300 group-hover:border-blue-300 h-full">
+              <div className="text-center">
+                <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:bg-blue-200 transition-colors">
+                  <svg className="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                  </svg>
+                </div>
+                <h2 className="text-2xl font-bold text-gray-900 mb-4">Text Chat</h2>
+                <p className="text-gray-600 mb-6">
+                  Traditional typing-based conversation. Great for detailed discussions and when you prefer writing.
+                </p>
+                <div className="space-y-2 text-sm text-gray-500">
+                  <div className="flex items-center justify-center">
+                    <svg className="w-4 h-4 text-green-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                    </svg>
+                    Works in all browsers
+                  </div>
+                  <div className="flex items-center justify-center">
+                    <svg className="w-4 h-4 text-green-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                    </svg>
+                    Detailed conversations
+                  </div>
+                  <div className="flex items-center justify-center">
+                    <svg className="w-4 h-4 text-green-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                    </svg>
+                    Easy to review history
+                  </div>
+                </div>
+                <div className="mt-6">
+                  <span className="inline-flex items-center px-4 py-2 bg-blue-100 text-blue-800 rounded-full text-sm font-medium group-hover:bg-blue-200 transition-colors">
+                    Start Text Chat →
+                  </span>
+                </div>
+              </div>
+            </div>
+          </Link>
+
+          {/* Voice Chat Option */}
+          <Link href="/chat/voice" className="group">
+            <div className="bg-white rounded-xl shadow-lg border border-gray-200 p-8 hover:shadow-xl transition-all duration-300 group-hover:border-green-300 h-full">
+              <div className="text-center">
+                <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:bg-green-200 transition-colors">
+                  <svg className="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
+                  </svg>
+                </div>
+                <h2 className="text-2xl font-bold text-gray-900 mb-4">Voice Chat</h2>
+                <p className="text-gray-600 mb-6">
+                  Speak naturally to your AI assistant. Perfect for when typing feels overwhelming or difficult.
+                </p>
+                <div className="space-y-2 text-sm text-gray-500">
+                  <div className="flex items-center justify-center">
+                    <svg className="w-4 h-4 text-green-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                    </svg>
+                    Less cognitive load
+                  </div>
+                  <div className="flex items-center justify-center">
+                    <svg className="w-4 h-4 text-green-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                    </svg>
+                    Natural conversation
+                  </div>
+                  <div className="flex items-center justify-center">
+                    <svg className="w-4 h-4 text-orange-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                    </svg>
+                    Requires Chrome browser
+                  </div>
+                </div>
+                <div className="mt-6">
+                  <span className="inline-flex items-center px-4 py-2 bg-green-100 text-green-800 rounded-full text-sm font-medium group-hover:bg-green-200 transition-colors">
+                    Start Voice Chat →
+                  </span>
+                </div>
+              </div>
+            </div>
+          </Link>
+        </div>
+
+        <div className="bg-blue-50 border border-blue-200 rounded-lg p-6">
           <div className="flex items-start">
             <div className="flex-shrink-0">
               <svg className="h-5 w-5 text-blue-400" viewBox="0 0 20 20" fill="currentColor">
@@ -46,51 +128,6 @@ export default async function ChatPage() {
                   <li>All data is anonymized and used only for pattern recognition</li>
                 </ul>
               </div>
-            </div>
-          </div>
-        </div>
-
-        <div className="h-[600px]">
-          <ChatInterface initialMessages={initialMessages} />
-        </div>
-
-        <div className="mt-6 bg-white rounded-lg border p-4">
-          <h3 className="text-lg font-semibold text-gray-900 mb-3">
-            How This Helps
-          </h3>
-          <div className="grid md:grid-cols-3 gap-4">
-            <div className="text-center">
-              <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-2">
-                <svg className="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-                </svg>
-              </div>
-              <h4 className="font-medium text-gray-900">Pattern Recognition</h4>
-              <p className="text-sm text-gray-600 mt-1">
-                Identify what triggers your crashes over time
-              </p>
-            </div>
-            <div className="text-center">
-              <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-2">
-                <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
-                </svg>
-              </div>
-              <h4 className="font-medium text-gray-900">Gentle Support</h4>
-              <p className="text-sm text-gray-600 mt-1">
-                Low cognitive load conversations designed for brain fog
-              </p>
-            </div>
-            <div className="text-center">
-              <div className="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-2">
-                <svg className="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-                </svg>
-              </div>
-              <h4 className="font-medium text-gray-900">Crash Prevention</h4>
-              <p className="text-sm text-gray-600 mt-1">
-                Learn to avoid triggers and pace activities better
-              </p>
             </div>
           </div>
         </div>
