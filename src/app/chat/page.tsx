@@ -19,7 +19,7 @@ export default async function ChatLandingPage() {
             AI Support Assistant
           </h1>
           <p className="text-xl text-gray-600 mb-8">
-            Choose how you'd like to communicate with your AI assistant
+            Choose how you&apos;d like to communicate with your AI assistant
           </p>
         </div>
 

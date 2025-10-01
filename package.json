@@ -26,11 +26,12 @@
     "e2e:start": "dotenv -e .env.e2e -- next start --port 3001",
     "e2e:test": "npx wait-on http://localhost:3001 && dotenv -e .env.e2e -- playwright test --project=anonymous --project=logged-in",
     "e2e:test:anonymous": "npx wait-on http://localhost:3001 && dotenv -e .env.e2e -- playwright test --project=anonymous",
-    "e2e:test:logged-in": "npx wait-on http://localhost:3001 && dotenv -e .env.e2e -- playwright test --project=logged-in"
+    "e2e:test:logged-in": "npx wait-on http://localhost:3001 && dotenv -e .env.e2e -- playwright test --project=logged-in",
+    "e2e:test:voiceflow": "npx wait-on http://localhost:3000 && dotenv -e .env.local -- playwright test --config=e2e-tests/voiceflow.config.ts"
   },
   "dependencies": {
-    "@highlight-run/next": "^7.9.23",
-    "@highlight-run/node": "^3.12.7",
+    "@highlight-run/next": "^7.9.38",
+    "@highlight-run/node": "^3.12.22",
     "@hookform/resolvers": "^5.0.1",
     "@neondatabase/serverless": "^1.0.0",
     "@radix-ui/react-slot": "^1.2.0",

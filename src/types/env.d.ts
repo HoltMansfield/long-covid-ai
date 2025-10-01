@@ -29,8 +29,8 @@ interface SpeechRecognition extends EventTarget {
   start(): void;
   stop(): void;
   abort(): void;
-  onresult: (event: SpeechRecognitionEvent) => void;
-  onerror: (event: SpeechRecognitionErrorEvent) => void;
+  onresult: (_event: SpeechRecognitionEvent) => void;
+  onerror: (_event: SpeechRecognitionErrorEvent) => void;
   onend: () => void;
   onstart: () => void;
 }
@@ -47,13 +47,13 @@ interface SpeechRecognitionErrorEvent {
 
 interface SpeechRecognitionResultList {
   length: number;
-  item(index: number): SpeechRecognitionResult;
+  item(_index: number): SpeechRecognitionResult;
   [index: number]: SpeechRecognitionResult;
 }
 
 interface SpeechRecognitionResult {
   length: number;
-  item(index: number): SpeechRecognitionAlternative;
+  item(_index: number): SpeechRecognitionAlternative;
   [index: number]: SpeechRecognitionAlternative;
   isFinal: boolean;
 }
@@ -63,12 +63,12 @@ interface SpeechRecognitionAlternative {
   confidence: number;
 }
 
-declare var SpeechRecognition: {
+declare const SpeechRecognition: {
   prototype: SpeechRecognition;
   new(): SpeechRecognition;
 };
 
-declare var webkitSpeechRecognition: {
+declare const webkitSpeechRecognition: {
   prototype: SpeechRecognition;
   new(): SpeechRecognition;
 };
@@ -82,29 +82,29 @@ interface SpeechSynthesisUtterance {
   rate: number;
   pitch: number;
   onstart:
-    | ((this: SpeechSynthesisUtterance, ev: SpeechSynthesisEvent) => any)
+    | ((_event: SpeechSynthesisEvent) => void)
     | null;
   onend:
-    | ((this: SpeechSynthesisUtterance, ev: SpeechSynthesisEvent) => any)
+    | ((_event: SpeechSynthesisEvent) => void)
     | null;
   onerror:
-    | ((this: SpeechSynthesisUtterance, ev: SpeechSynthesisErrorEvent) => any)
+    | ((_event: SpeechSynthesisErrorEvent) => void)
     | null;
   onpause:
-    | ((this: SpeechSynthesisUtterance, ev: SpeechSynthesisEvent) => any)
+    | ((_event: SpeechSynthesisEvent) => void)
     | null;
   onresume:
-    | ((this: SpeechSynthesisUtterance, ev: SpeechSynthesisEvent) => any)
+    | ((_event: SpeechSynthesisEvent) => void)
     | null;
   onmark:
-    | ((this: SpeechSynthesisUtterance, ev: SpeechSynthesisEvent) => any)
+    | ((_event: SpeechSynthesisEvent) => void)
     | null;
   onboundary:
-    | ((this: SpeechSynthesisUtterance, ev: SpeechSynthesisEvent) => any)
+    | ((_event: SpeechSynthesisEvent) => void)
     | null;
 }
 
-declare var SpeechSynthesisUtterance: {
+declare const SpeechSynthesisUtterance: {
   prototype: SpeechSynthesisUtterance;
   new (text?: string): SpeechSynthesisUtterance;
 };
@@ -138,7 +138,7 @@ interface SpeechSynthesis extends EventTarget {
   pause(): void;
   resume(): void;
   getVoices(): SpeechSynthesisVoice[];
-  onvoiceschanged: ((this: SpeechSynthesis, ev: Event) => any) | null;
+  onvoiceschanged: ((_event: Event) => void) | null;
 }
 
 interface Window {

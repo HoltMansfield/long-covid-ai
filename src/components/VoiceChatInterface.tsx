@@ -227,7 +227,7 @@ export default function VoiceChatInterface({
   useEffect(() => {
     if (isSupported && conversationCount === 0 && hasUserInteracted) {
       setTimeout(() => {
-        speakText("I understand you've experienced a crash. I'm here to help you understand what might have triggered it. Let's start simple - on a scale of 1 to 10, how severe was this crash for you?");
+        speakText("I understand you&apos;ve experienced a crash. I&apos;m here to help you understand what might have triggered it. Let&apos;s start simple - on a scale of 1 to 10, how severe was this crash for you?");
       }, 500);
     }
   }, [isSupported, hasUserInteracted]);
@@ -267,7 +267,7 @@ export default function VoiceChatInterface({
           <p className="text-gray-600">
             {conversationCount === 0 
               ? hasUserInteracted 
-                ? "I'll greet you in just a moment..."
+                ? "I&apos;ll greet you in just a moment..."
                 : "Click the microphone to start our conversation"
               : `Conversation turn ${conversationCount}`
             }
@@ -370,18 +370,18 @@ export default function VoiceChatInterface({
           <div className="mt-8 max-w-md mx-auto">
             <p className="text-lg text-gray-600 mb-4">
               {isListening 
-                ? "Speak now... I'm listening"
+                ? "Speak now... I&apos;m listening"
                 : isLoading
                 ? "Processing your message..."
                 : isSpeaking
-                ? "I'm responding to you..."
+                ? "I&apos;m responding to you..."
                 : conversationCount === 0
                 ? "Click the microphone to start our conversation"
-                : "I'll start listening automatically after I finish speaking"
+                : "I&apos;ll start listening automatically after I finish speaking"
               }
             </p>
             <p className="text-sm text-gray-500">
-              💡 After I ask a question, I'll automatically start listening for your response.
+              💡 After I ask a question, I&apos;ll automatically start listening for your response.
             </p>
           </div>
         </div>

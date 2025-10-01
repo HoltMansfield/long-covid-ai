@@ -5,7 +5,7 @@ import { crashReports, conversations, conversationCrashReports } from "@/db/sche
 import { withHighlightError } from "@/highlight-error";
 import { StructuredCrashReport } from "@/types/crash-report";
 import { ChatMessage } from "@/lib/openai";
-import { eq, gte } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 
 interface SaveCrashReportResult {
   success: boolean;
@@ -131,7 +131,7 @@ export const updateCrashReport = withHighlightError(_updateCrashReport);
 async function _findRecentCrashReport(userId: string): Promise<string | null> {
   try {
     // Look for crash reports created in the last 2 hours
-    const twoHoursAgo = new Date(Date.now() - 2 * 60 * 60 * 1000);
+    // const twoHoursAgo = new Date(Date.now() - 2 * 60 * 60 * 1000);
     
     const recentReports = await db.select({ id: crashReports.id })
       .from(crashReports)

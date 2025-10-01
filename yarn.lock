@@ -241,7 +241,7 @@
     "@opentelemetry/sdk-trace-web" "^1.30.1"
     "@opentelemetry/semantic-conventions" "^1.28.0"
 
-"@highlight-run/next@^7.9.23":
+"@highlight-run/next@^7.9.38":
   version "7.9.38"
   resolved "https://registry.npmjs.org/@highlight-run/next/-/next-7.9.38.tgz"
   integrity sha512-wjqvtnb18e/fEzjqPCQBtOeM03+7x7dk6Jdah7u7VOTbtdz6T4LUw2UATLkN+zIr+tlbMBPD065eG8aEQ9mDwg==
@@ -254,7 +254,7 @@
     js-cookie "^3.0.5"
     next ">=13"
 
-"@highlight-run/node@^3.12.7", "@highlight-run/node@3.12.22":
+"@highlight-run/node@^3.12.22", "@highlight-run/node@3.12.22":
   version "3.12.22"
   resolved "https://registry.npmjs.org/@highlight-run/node/-/node-3.12.22.tgz"
   integrity sha512-ujqFuC/+3mGiBeY+Fi59ChLnS2AvAz59+idMyt44Lb2vQVyWR/8SfLRzYxFzcLpnZqF8v04sCjqUtKNe+ssWfw==

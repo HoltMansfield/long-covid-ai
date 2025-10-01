@@ -6,7 +6,7 @@ import { sendChatMessage } from "@/app/chat/actions";
 
 interface ChatInterfaceProps {
   initialMessages?: ChatMessage[];
-  onMessageSent?: (messages: ChatMessage[]) => void;
+  onMessageSent?: (_updatedMessages: ChatMessage[]) => void;
   disabled?: boolean;
 }
 
