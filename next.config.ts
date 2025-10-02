@@ -14,10 +14,10 @@ const nextConfig: NextConfig = {
             value: [
               "default-src 'self'",
               "img-src * data:",
-              "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
+              "script-src 'self' 'unsafe-inline' 'unsafe-eval' blob: data:",
               "style-src 'self' 'unsafe-inline'",
               "font-src 'self' data: https://fonts.gstatic.com",
-              "connect-src *",
+              "connect-src * wss://api.elevenlabs.io",
               "worker-src 'self' blob: data:",
             ].join("; ")
           },

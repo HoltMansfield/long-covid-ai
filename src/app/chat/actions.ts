@@ -1,11 +1,9 @@
 "use server";
 
 import { generateAIResponse, ChatMessage } from "@/lib/openai";
-import { withHighlightError } from "@/highlight-error";
 import { extractCrashReportFromConversation } from "@/lib/crash-analysis";
 import { saveCrashReport, updateCrashReport, findRecentCrashReport } from "./crash-report-actions";
 import { getCurrentUserId } from "@/actions/auth";
-import { H } from '@highlight-run/next/client';
 
 interface ChatActionResult {
   success: boolean;
@@ -14,7 +12,7 @@ interface ChatActionResult {
   error?: string;
 }
 
-async function _sendChatMessage(messages: ChatMessage[]): Promise<ChatActionResult> {
+export async function sendChatMessage(messages: ChatMessage[]): Promise<ChatActionResult> {
   try {
     // Validate messages array
     if (!messages || !Array.isArray(messages)) {
@@ -75,28 +73,19 @@ async function _sendChatMessage(messages: ChatMessage[]): Promise<ChatActionResu
           
           if (result.success) {
             console.log("Crash report processed successfully:", result.crashReportId);
-          } else {
             console.error("Failed to process crash report:", result.error);
           }
         }
       }
     } catch (error) {
-      // Log crash report saving errors to Highlight for monitoring
+      // Log crash report saving errors for monitoring
       console.error("Error in crash report detection/saving:", error);
-      H.consumeError(error as Error);
-      // Add additional context for debugging
-      H.track('crash_report_saving_error', {
-        context: 'crash_report_saving',
-        userId: await getCurrentUserId(),
-        messageCount: updatedMessages.length,
-        errorMessage: (error as Error).message
-      });
+      // Don't fail the whole chat action if crash report saving fails
     }
 
     return {
       success: true,
       message: aiResponse,
-      timestamp: new Date().toISOString(),
     };
   } catch (error) {
     console.error("Chat action error:", error);
@@ -107,4 +96,3 @@ async function _sendChatMessage(messages: ChatMessage[]): Promise<ChatActionResu
   }
 }
 
-export const sendChatMessage = withHighlightError(_sendChatMessage);

@@ -2,7 +2,6 @@
 
 import { db } from "@/db/connect";
 import { crashReports, conversations, conversationCrashReports } from "@/db/schema";
-import { withHighlightError } from "@/highlight-error";
 import { StructuredCrashReport } from "@/types/crash-report";
 import { ChatMessage } from "@/lib/openai";
 import { eq } from "drizzle-orm";
@@ -13,7 +12,7 @@ interface SaveCrashReportResult {
   error?: string;
 }
 
-async function _saveCrashReport(
+export async function saveCrashReport(
   userId: string,
   crashReportData: StructuredCrashReport,
   conversationMessages: ChatMessage[]
@@ -71,10 +70,9 @@ async function _saveCrashReport(
 }
 
 
-export const saveCrashReport = withHighlightError(_saveCrashReport);
 
 // Function to update an existing crash report
-async function _updateCrashReport(
+export async function updateCrashReport(
   crashReportId: string,
   crashReportData: StructuredCrashReport,
   conversationMessages: ChatMessage[]
@@ -125,10 +123,9 @@ async function _updateCrashReport(
   }
 }
 
-export const updateCrashReport = withHighlightError(_updateCrashReport);
 
 // Function to find existing crash report from recent conversation
-async function _findRecentCrashReport(userId: string): Promise<string | null> {
+export async function findRecentCrashReport(userId: string): Promise<string | null> {
   try {
     // Look for crash reports created in the last 2 hours
     // const twoHoursAgo = new Date(Date.now() - 2 * 60 * 60 * 1000);
@@ -146,10 +143,9 @@ async function _findRecentCrashReport(userId: string): Promise<string | null> {
   }
 }
 
-export const findRecentCrashReport = withHighlightError(_findRecentCrashReport);
 
 // Function to get user's crash reports for analysis
-async function _getUserCrashReports(userId: string) {
+export async function getUserCrashReports(userId: string) {
   try {
     const reports = await db.select()
       .from(crashReports)
@@ -169,4 +165,3 @@ async function _getUserCrashReports(userId: string) {
   }
 }
 
-export const getUserCrashReports = withHighlightError(_getUserCrashReports);

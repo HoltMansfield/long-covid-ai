@@ -1,6 +1,4 @@
 "use server";
-import { withHighlightError } from "@/highlight-error";
-import { H } from '@highlight-run/next/client';
 import { db } from "@/db/connect";
 import { users } from "@/db/schema";
 import { eq } from "drizzle-orm";
@@ -11,7 +9,7 @@ import * as yup from "yup";
 import { RegisterFormInputs, schema } from "./schema";
 //import { sendWelcomeEmail } from "@/actions/emails";
 
-async function _registerAction(
+export async function registerAction(
   state: { error?: string; message?: string; success?: boolean } | undefined,
   data: RegisterFormInputs
 ): Promise<
@@ -47,13 +45,11 @@ async function _registerAction(
       //await sendWelcomeEmail(email);
     } catch (error) {
       console.error("Failed to send welcome email:", error);
-      H.consumeError(error as Error);
     }
   }
 
   return { message: "Action successful!", success: true };
 }
 
-export const registerAction = withHighlightError(_registerAction);
 
 

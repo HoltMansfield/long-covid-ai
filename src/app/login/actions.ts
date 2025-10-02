@@ -1,5 +1,4 @@
 "use server";
-import { withHighlightError } from "@/highlight-error";
 import { cookies } from "next/headers";
 import { db } from "@/db/connect";
 import { users } from "@/db/schema";
@@ -8,7 +7,7 @@ import bcrypt from "bcryptjs";
 import { MAX_FAILED_ATTEMPTS, LOCKOUT_DURATION_MS } from "./constants";
 import { redirect } from "next/navigation";
 
-async function _loginAction(
+export async function loginAction(
   state: { error?: string; success?: boolean } | undefined,
   data: { email: string; password: string }
 ): Promise<{ error?: string; success?: boolean } | undefined> {
@@ -82,4 +81,3 @@ async function _loginAction(
   redirect("/");
 }
 
-export const loginAction = withHighlightError(_loginAction);
