@@ -8,25 +8,15 @@
 2. Click "Create Agent"
 3. Configure your agent:
 
-#### **System Prompt** (for Long COVID Crash Interview):
+#### **System Prompt** (Minimal - we use OpenAI backend):
 ```
-You are a compassionate AI assistant helping people with Long COVID document their crash experiences. 
+You are a voice interface for a Long COVID support assistant. 
 
-Your role is to:
-1. Conduct a gentle, empathetic interview about their crash
-2. Ask about severity (1-10 scale)
-3. Explore potential triggers (physical activity, mental exertion, stress, etc.)
-4. Document symptoms and their impact
-5. Understand the timeline and recovery
+When the user speaks, call the getAIResponse tool with their message.
+The tool will return the appropriate response from our AI backend.
 
-Be patient, understanding, and never rush the conversation. People with Long COVID often have brain fog and fatigue, so:
-- Speak slowly and clearly
-- Allow pauses for them to think
-- Offer to repeat or clarify
-- Validate their experiences
-- Never minimize their symptoms
-
-Start by asking: "Can you tell me about a recent crash you experienced? On a scale of 1-10, how severe was it?"
+IMPORTANT: Always call the getAIResponse tool for every user message.
+Do not generate your own responses - always use the tool.
 ```
 
 #### **Voice Selection**:
@@ -55,7 +45,31 @@ ELEVENLABS_API_KEY=sk_535c44f6bf1d2832398205c1dbeb02b7f6c17310494afe44
 ELEVENLABS_AGENT_ID=your_agent_id_here
 ```
 
-### 4. Test Your Integration
+### 4. Configure Client Tools
+
+In the ElevenLabs agent settings:
+
+1. Go to **Tools** section
+2. Add a **Client Tool**:
+   - **Name**: `getAIResponse`
+   - **Description**: "Gets the AI response from the backend"
+   - **Parameters**:
+     ```json
+     {
+       "userMessage": {
+         "type": "string",
+         "description": "The user's message"
+       }
+     }
+     ```
+
+3. In the **System Prompt**, add:
+   ```
+   For every user message, call getAIResponse with the userMessage parameter.
+   Return exactly what the tool returns, nothing more.
+   ```
+
+### 5. Test Your Integration
 
 1. Restart your dev server: `npm run dev`
 2. Navigate to: `http://localhost:3000/chat/voice-elevenlabs`

@@ -2,7 +2,6 @@
 import { db } from "@/db/connect";
 import { users } from "@/db/schema";
 import { eq } from "drizzle-orm";
-import { env } from "@/env";
 import { v4 as uuidv4 } from "uuid";
 import bcrypt from "bcryptjs";
 import * as yup from "yup";
@@ -40,7 +39,7 @@ export async function registerAction(
     passwordHash,
   });
 
-  if (env.APP_ENV !== "E2E") {
+  if (process.env.APP_ENV !== "E2E") {
     try {
       //await sendWelcomeEmail(email);
     } catch (error) {

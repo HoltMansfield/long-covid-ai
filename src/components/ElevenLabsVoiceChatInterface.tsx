@@ -1,12 +1,16 @@
 "use client";
 
 import { useConversation } from "@11labs/react";
-import { useCallback, useState, useEffect } from "react";
-import { getElevenLabsSignedUrl } from "@/actions/elevenlabs";
+import { useCallback, useState, useEffect, useRef } from "react";
+import {
+  getElevenLabsSignedUrl,
+  handleVoiceChatMessage,
+} from "@/actions/elevenlabs";
+import { ChatMessage } from "@/lib/openai";
 
 interface ElevenLabsVoiceChatInterfaceProps {
   agentId: string;
-  onConversationEnd?: (transcript: string) => void;
+  onConversationEnd?: (transcript: string, messages: ChatMessage[]) => void;
 }
 
 export default function ElevenLabsVoiceChatInterface({
@@ -16,16 +20,41 @@ export default function ElevenLabsVoiceChatInterface({
   const [signedUrl, setSignedUrl] = useState<string | null>(null);
   const [transcript, setTranscript] = useState<string>("");
   const [error, setError] = useState<string | null>(null);
+  const conversationHistory = useRef<ChatMessage[]>([]);
 
-  // Initialize conversation with signed URL
+  // Define client tools configuration
+  const clientToolsConfig = {
+    clientTools: {
+      // This tool will be called by ElevenLabs agent to get responses
+      getAIResponse: async (params: { userMessage: string }) => {
+        console.log("🔧 Client tool called with:", params);
+        try {
+          const response = await handleVoiceChatMessage(
+            params.userMessage,
+            conversationHistory.current
+          );
+          return response;
+        } catch (error) {
+          console.error("Error in client tool:", error);
+          return "I'm having trouble right now. Please try again.";
+        }
+      },
+    },
+  };
+
+  // Initialize conversation with signed URL and client tools
   const conversation = useConversation({
     onConnect: () => {
       console.log("✅ Connected to ElevenLabs");
+      console.log(
+        "🔧 Client tools registered:",
+        Object.keys(clientToolsConfig.clientTools)
+      );
     },
     onDisconnect: () => {
       console.log("❌ Disconnected from ElevenLabs");
-      if (onConversationEnd && transcript) {
-        onConversationEnd(transcript);
+      if (onConversationEnd && conversationHistory.current.length > 0) {
+        onConversationEnd(transcript, conversationHistory.current);
       }
     },
     onMessage: (message) => {
@@ -33,12 +62,27 @@ export default function ElevenLabsVoiceChatInterface({
       // Append to transcript
       if (message.message) {
         setTranscript((prev) => prev + "\n" + message.message);
+
+        // Add to conversation history
+        if (message.source === "user") {
+          conversationHistory.current.push({
+            role: "user",
+            content: message.message,
+          });
+        } else if (message.source === "ai") {
+          conversationHistory.current.push({
+            role: "assistant",
+            content: message.message,
+          });
+        }
       }
     },
     onError: (error) => {
       console.error("❌ ElevenLabs error:", error);
-      setError(error.message || "An error occurred");
+      setError(String(error) || "An error occurred");
     },
+    // Client tools - this is where we call our OpenAI backend
+    ...clientToolsConfig,
   });
 
   // Fetch signed URL on mount
@@ -47,7 +91,10 @@ export default function ElevenLabsVoiceChatInterface({
       try {
         console.log("🔑 Fetching signed URL for agent:", agentId);
         const url = await getElevenLabsSignedUrl(agentId);
-        console.log("📝 Received signed URL:", url ? "✅ Success" : "❌ Failed");
+        console.log(
+          "📝 Received signed URL:",
+          url ? "✅ Success" : "❌ Failed"
+        );
         if (url) {
           setSignedUrl(url);
         } else {
@@ -55,7 +102,10 @@ export default function ElevenLabsVoiceChatInterface({
         }
       } catch (err) {
         console.error("Error fetching signed URL:", err);
-        setError("Failed to initialize conversation: " + (err instanceof Error ? err.message : String(err)));
+        setError(
+          "Failed to initialize conversation: " +
+            (err instanceof Error ? err.message : String(err))
+        );
       }
     }
 
@@ -70,10 +120,22 @@ export default function ElevenLabsVoiceChatInterface({
 
     try {
       setError(null);
-      await conversation.startSession({ signedUrl });
+      console.log("🚀 Starting conversation with signed URL");
+
+      await conversation.startSession({
+        signedUrl,
+        overrides: {
+          agent: {
+            firstMessage:
+              "I understand you've experienced a crash. I'm here to help you understand what might have triggered it. Let's start simple - on a scale of 1 to 10, how severe was this crash for you?",
+          },
+        },
+      });
+
+      console.log("✅ Session started successfully");
     } catch (err) {
-      console.error("Error starting conversation:", err);
-      setError("Failed to start conversation");
+      console.error("❌ Error starting conversation:", err);
+      setError("Failed to start conversation: " + String(err));
     }
   }, [signedUrl, conversation]);
 
@@ -104,16 +166,16 @@ export default function ElevenLabsVoiceChatInterface({
               status === "connected"
                 ? "bg-green-500 animate-pulse"
                 : status === "connecting"
-                ? "bg-yellow-500 animate-pulse"
-                : "bg-gray-300"
+                  ? "bg-yellow-500 animate-pulse"
+                  : "bg-gray-300"
             }`}
           />
           <span className="text-sm font-medium text-gray-700">
             {status === "connected"
               ? "Connected"
               : status === "connecting"
-              ? "Connecting..."
-              : "Disconnected"}
+                ? "Connecting..."
+                : "Disconnected"}
           </span>
         </div>
 

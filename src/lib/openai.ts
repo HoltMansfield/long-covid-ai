@@ -1,8 +1,29 @@
-import OpenAI from 'openai';
-import { env } from '@/env';
+import OpenAI from "openai";
 
-export const openai = new OpenAI({
-  apiKey: env.OPENAI_API_KEY,
+// Lazy-load OpenAI client to avoid module evaluation issues
+let _openai: OpenAI | null = null;
+
+function getOpenAIClient(): OpenAI {
+  if (!_openai) {
+    const apiKey = process.env.OPENAI_API_KEY;
+    if (!apiKey) {
+      throw new Error(
+        'OPENAI_API_KEY is not set. Check your .env.local file.'
+      );
+    }
+    _openai = new OpenAI({ apiKey });
+  }
+  return _openai;
+}
+
+// Export a proxy that lazily initializes the client
+export const openai = new Proxy({} as OpenAI, {
+  get(_target, prop) {
+    const client = getOpenAIClient();
+    const value = (client as any)[prop];
+    // Bind methods to the client instance
+    return typeof value === 'function' ? value.bind(client) : value;
+  },
 });
 
 // System prompt for Long COVID AI Agent
@@ -36,51 +57,61 @@ Severity Indicators to Watch For:
 Remember: Your role is to help identify patterns and triggers, not to provide medical treatment. Every piece of information matters, especially from those who are most severely affected.`;
 
 export interface ChatMessage {
-  role: 'system' | 'user' | 'assistant';
+  role: "system" | "user" | "assistant";
   content: string;
 }
 
-export async function generateAIResponse(messages: ChatMessage[]): Promise<string> {
+export async function generateAIResponse(
+  messages: ChatMessage[]
+): Promise<string> {
   try {
+    const fullMessages = [
+      { role: "system" as const, content: LONG_COVID_SYSTEM_PROMPT },
+      ...messages,
+    ];
+    
+    console.log('\n=== SENDING TO OPENAI ===');
+    console.log('Messages:', JSON.stringify(fullMessages, null, 2));
+    
     const response = await openai.chat.completions.create({
-      model: 'gpt-4o-mini', // Free tier compatible model
-      messages: [
-        { role: 'system', content: LONG_COVID_SYSTEM_PROMPT },
-        ...messages
-      ],
+      model: "gpt-4o-mini", // Free tier compatible model
+      messages: fullMessages,
       max_tokens: 300, // Keep responses concise for low cognitive load
       temperature: 0.7,
     });
 
     // Log the full response to debug format issues
-    console.log('OpenAI Full Response:', JSON.stringify(response, null, 2));
-    console.log('Response choices:', response.choices);
-    console.log('First choice:', response.choices[0]);
-    console.log('Message content:', response.choices[0]?.message?.content);
-    
-    return response.choices[0]?.message?.content || 'I apologize, but I encountered an error. Please try again.';
+    console.log("OpenAI Full Response:", JSON.stringify(response, null, 2));
+    console.log("Response choices:", response.choices);
+    console.log("First choice:", response.choices[0]);
+    console.log("Message content:", response.choices[0]?.message?.content);
+
+    return (
+      response.choices[0]?.message?.content ||
+      "I apologize, but I encountered an error. Please try again."
+    );
   } catch (error) {
-    console.error('OpenAI API error:', error);
-    
+    console.error("OpenAI API error:", error);
+
     // More detailed error logging
     if (error instanceof Error) {
-      console.error('Error message:', error.message);
+      console.error("Error message:", error.message);
     }
-    
+
     // Check if it's an API key issue
-    if (error && typeof error === 'object' && 'status' in error) {
+    if (error && typeof error === "object" && "status" in error) {
       if (error.status === 401) {
-        return 'API key error. Please check your OpenAI API key configuration.';
+        return "API key error. Please check your OpenAI API key configuration.";
       }
       if (error.status === 429) {
-        return 'Rate limit exceeded. Please try again in a moment.';
+        return "Rate limit exceeded. Please try again in a moment.";
       }
       if (error.status === 402) {
-        return 'Billing issue. Please check your OpenAI account billing.';
+        return "Billing issue. Please check your OpenAI account billing.";
       }
     }
-    
-    return 'I apologize, but I encountered an error connecting to the AI service. Please try again later.';
+
+    return "I apologize, but I encountered an error connecting to the AI service. Please try again later.";
   }
 }
 
@@ -88,32 +119,52 @@ export async function generateAIResponse(messages: ChatMessage[]): Promise<strin
 export function createCrashReportInterview(): ChatMessage[] {
   return [
     {
-      role: 'assistant',
-      content: 'I understand you\'ve experienced a crash. I\'m here to help you understand what might have triggered it. Let\'s start simple - on a scale of 1 to 10, how severe was this crash for you?'
-    }
+      role: "assistant",
+      content:
+        "I understand you've experienced a crash. I'm here to help you understand what might have triggered it. Let's start simple - on a scale of 1 to 10, how severe was this crash for you?",
+    },
   ];
 }
 
 // Helper function to analyze triggers from conversation
-export function extractTriggersFromConversation(messages: ChatMessage[]): string[] {
+export function extractTriggersFromConversation(
+  messages: ChatMessage[]
+): string[] {
   // This would be enhanced with more sophisticated analysis
   const triggers: string[] = [];
   const commonTriggers = [
-    'physical activity', 'exercise', 'walking', 'stairs',
-    'mental exertion', 'work', 'reading', 'computer',
-    'stress', 'emotional stress', 'anxiety', 'social anxiety',
-    'social activity', 'socializing', 'party',
-    'travel', 'driving', 'shopping',
-    'heat', 'cold', 'weather',
-    'sleep', 'poor sleep', 'insomnia'
+    "physical activity",
+    "exercise",
+    "walking",
+    "stairs",
+    "mental exertion",
+    "work",
+    "reading",
+    "computer",
+    "stress",
+    "emotional stress",
+    "anxiety",
+    "social anxiety",
+    "social activity",
+    "socializing",
+    "party",
+    "travel",
+    "driving",
+    "shopping",
+    "heat",
+    "cold",
+    "weather",
+    "sleep",
+    "poor sleep",
+    "insomnia",
   ];
 
   const conversationText = messages
-    .filter(m => m.role === 'user')
-    .map(m => m.content.toLowerCase())
-    .join(' ');
+    .filter((m) => m.role === "user")
+    .map((m) => m.content.toLowerCase())
+    .join(" ");
 
-  commonTriggers.forEach(trigger => {
+  commonTriggers.forEach((trigger) => {
     if (conversationText.includes(trigger)) {
       triggers.push(trigger);
     }

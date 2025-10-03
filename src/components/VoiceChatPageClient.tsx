@@ -1,15 +1,35 @@
 "use client";
 
+import { useState } from 'react';
 import ElevenLabsVoiceChatInterface from '@/components/ElevenLabsVoiceChatInterface';
+import { extractCrashReportFromConversation } from '@/lib/crash-analysis';
+import { StructuredCrashReport } from '@/types/crash-report';
 
 interface VoiceChatPageClientProps {
   agentId: string;
 }
 
 export default function VoiceChatPageClient({ agentId }: VoiceChatPageClientProps) {
-  const handleConversationEnd = (transcript: string) => {
-    console.log("Conversation ended. Transcript:", transcript);
-    // TODO: Save transcript to database as crash report
+  const [crashReport, setCrashReport] = useState<StructuredCrashReport | null>(null);
+  const [extracting, setExtracting] = useState(false);
+
+  const handleConversationEnd = async (transcript: string, messages: Array<{ role: string; content: string }>) => {
+    console.log("Conversation ended. Extracting crash report...");
+    
+    setExtracting(true);
+    try {
+      const report = await extractCrashReportFromConversation(messages);
+      if (report) {
+        console.log("✅ Crash report extracted:", report);
+        setCrashReport(report);
+      } else {
+        console.log("❌ No crash report could be extracted");
+      }
+    } catch (error) {
+      console.error("Error extracting crash report:", error);
+    } finally {
+      setExtracting(false);
+    }
   };
 
   return (
@@ -106,6 +126,109 @@ export default function VoiceChatPageClient({ agentId }: VoiceChatPageClientProp
             the conversation at any time.
           </p>
         </div>
+
+        {/* Crash Report Extraction Status */}
+        {extracting && (
+          <div className="mt-6 bg-blue-50 border border-blue-200 rounded-lg p-4">
+            <div className="flex items-center">
+              <svg className="animate-spin h-5 w-5 text-blue-600 mr-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              </svg>
+              <p className="text-blue-800 font-medium">Analyzing conversation and extracting crash report...</p>
+            </div>
+          </div>
+        )}
+
+        {/* Extracted Crash Report */}
+        {crashReport && (
+          <div className="mt-6 bg-white border border-green-200 rounded-lg shadow-lg">
+            <div className="bg-green-50 border-b border-green-200 px-6 py-4">
+              <h3 className="text-xl font-bold text-green-900 flex items-center">
+                <svg className="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                Crash Report Extracted
+              </h3>
+            </div>
+            <div className="p-6 space-y-4">
+              {/* Severity */}
+              <div>
+                <h4 className="font-semibold text-gray-900 mb-2">Severity</h4>
+                <div className="flex items-center">
+                  <div className="flex-1 bg-gray-200 rounded-full h-4 mr-3">
+                    <div 
+                      className={`h-4 rounded-full ${
+                        crashReport.severity >= 8 ? 'bg-red-600' :
+                        crashReport.severity >= 5 ? 'bg-yellow-500' :
+                        'bg-green-500'
+                      }`}
+                      style={{ width: `${crashReport.severity * 10}%` }}
+                    ></div>
+                  </div>
+                  <span className="font-bold text-lg">{crashReport.severity}/10</span>
+                </div>
+              </div>
+
+              {/* AI Summary */}
+              {crashReport.aiSummary && (
+                <div>
+                  <h4 className="font-semibold text-gray-900 mb-2">Summary</h4>
+                  <p className="text-gray-700 bg-gray-50 p-3 rounded">{crashReport.aiSummary}</p>
+                </div>
+              )}
+
+              {/* Triggers */}
+              {crashReport.triggers && crashReport.triggers.length > 0 && (
+                <div>
+                  <h4 className="font-semibold text-gray-900 mb-2">Triggers</h4>
+                  <div className="space-y-2">
+                    {crashReport.triggers.map((trigger, i) => (
+                      <div key={i} className="bg-red-50 border border-red-200 rounded p-3">
+                        <div className="flex justify-between items-start">
+                          <div>
+                            <span className="font-medium text-red-900">{trigger.type}</span>
+                            <p className="text-sm text-red-700 mt-1">{trigger.description}</p>
+                          </div>
+                          <span className="text-xs bg-red-200 text-red-800 px-2 py-1 rounded">Intensity: {trigger.intensity}/10</span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Symptoms */}
+              {crashReport.symptoms && crashReport.symptoms.length > 0 && (
+                <div>
+                  <h4 className="font-semibold text-gray-900 mb-2">Symptoms</h4>
+                  <div className="grid grid-cols-2 gap-2">
+                    {crashReport.symptoms.map((symptom, i) => (
+                      <div key={i} className="bg-blue-50 border border-blue-200 rounded p-2">
+                        <p className="font-medium text-blue-900 text-sm">{symptom.name}</p>
+                        <p className="text-xs text-blue-700">Severity: {symptom.severity}/10</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Timeline */}
+              {crashReport.timeline && (
+                <div>
+                  <h4 className="font-semibold text-gray-900 mb-2">Timeline</h4>
+                  <div className="bg-purple-50 border border-purple-200 rounded p-3 text-sm">
+                    <p><strong>Onset:</strong> {crashReport.timeline.onset}</p>
+                    <p><strong>Duration:</strong> {crashReport.timeline.duration}</p>
+                    {crashReport.timeline.recoveryTime && (
+                      <p><strong>Recovery Time:</strong> {crashReport.timeline.recoveryTime}</p>
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
