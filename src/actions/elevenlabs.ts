@@ -1,5 +1,7 @@
 'use server';
 
+import { generateAIResponse, createCrashReportInterview, ChatMessage } from '@/lib/openai';
+
 // Disable Highlight.run for these actions to avoid Next.js 15 compatibility issues
 // @ts-ignore
 if (typeof globalThis !== 'undefined') {
@@ -68,5 +70,45 @@ export async function getElevenLabsSignedUrl(agentId: string): Promise<string | 
   } catch (error) {
     console.error('❌ Exception getting ElevenLabs signed URL:', error);
     return null;
+  }
+}
+
+/**
+ * Server action to handle chat messages from ElevenLabs client tools
+ * This allows ElevenLabs to call our OpenAI backend for conversation logic
+ */
+export async function handleVoiceChatMessage(
+  userMessage: string,
+  conversationHistory: ChatMessage[] = []
+): Promise<string> {
+  try {
+    console.log('\n\n=== VOICE CHAT MESSAGE ===');
+    console.log('User message:', userMessage);
+    console.log('History length:', conversationHistory.length);
+
+    // If this is the first message, include the opening
+    let messages: ChatMessage[];
+    if (conversationHistory.length === 0) {
+      // Start with the crash interview opening
+      const opening = createCrashReportInterview();
+      messages = [
+        ...opening,
+        { role: 'user', content: userMessage }
+      ];
+    } else {
+      messages = [
+        ...conversationHistory,
+        { role: 'user', content: userMessage }
+      ];
+    }
+
+    // Get AI response from OpenAI
+    const aiResponse = await generateAIResponse(messages);
+    console.log('✅ AI Response:', aiResponse);
+
+    return aiResponse;
+  } catch (error) {
+    console.error('❌ Error handling voice chat message:', error);
+    return "I apologize, but I'm having trouble processing that right now. Could you please try again?";
   }
 }

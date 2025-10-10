@@ -1,15 +1,36 @@
 "use client";
 
+import { useState } from 'react';
 import ElevenLabsVoiceChatInterface from '@/components/ElevenLabsVoiceChatInterface';
+import { extractCrashReportFromConversation } from '@/lib/crash-analysis';
+import { StructuredCrashReport } from '@/types/crash-report';
+import { ChatMessage } from '@/lib/openai';
 
 interface VoiceChatPageClientProps {
   agentId: string;
 }
 
 export default function VoiceChatPageClient({ agentId }: VoiceChatPageClientProps) {
-  const handleConversationEnd = (transcript: string) => {
-    console.log("Conversation ended. Transcript:", transcript);
-    // TODO: Save transcript to database as crash report
+  const [crashReport, setCrashReport] = useState<StructuredCrashReport | null>(null);
+  const [extracting, setExtracting] = useState(false);
+
+  const handleConversationEnd = async (transcript: string, messages: ChatMessage[]) => {
+    console.log("Conversation ended. Extracting crash report...");
+    
+    setExtracting(true);
+    try {
+      const report = await extractCrashReportFromConversation(messages);
+      if (report) {
+        console.log("✅ Crash report extracted:", report);
+        setCrashReport(report);
+      } else {
+        console.log("❌ No crash report could be extracted");
+      }
+    } catch (error) {
+      console.error("Error extracting crash report:", error);
+    } finally {
+      setExtracting(false);
+    }
   };
 
   return (
